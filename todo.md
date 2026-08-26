@@ -14,6 +14,7 @@
 - [x] Show each uploaded image as a thumbnail preview in the conversion queue so users can identify the selected file before converting it.
 - [x] Replace failing standard-image public outputs (SVG, ICO, CUR, TIFF, BMP, GIF and TGA) with browser-safe encoders, and hide JXL, HDR and EXR until a reliable public path exists.
 - [ ] Add truthful homepage SEO metadata, keyword-led headings, conversion guidance, FAQ markup and structured data without claiming unverified usage, offline mode or unlimited file sizes.
+- [ ] Add truthful compression-page SEO metadata, keyword-led content, use cases, FAQ markup and structured data without guaranteeing 90% savings, lossless results or offline operation.
 
 ## Hybrid Deployment Monorepo
 
