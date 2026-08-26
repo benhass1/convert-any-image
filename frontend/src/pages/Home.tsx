@@ -81,7 +81,7 @@ export default function Home() {
         <div className="mt-8 flex flex-wrap gap-x-7 gap-y-3 text-sm font-semibold text-[#e6e1d8]/82"><span className="flex items-center gap-2"><LockKeyhole className="h-4 w-4 text-[#b7f840]"/>No upload</span><span className="flex items-center gap-2"><ScanLine className="h-4 w-4 text-[#b7f840]"/>Format registry</span><span className="flex items-center gap-2"><Files className="h-4 w-4 text-[#b7f840]"/>ZIP output</span></div>
       </div></div>
     </section>
-    <section className="relative mx-auto -mt-7 max-w-[1440px] px-3 pb-20 sm:px-5 lg:-mt-10 lg:px-10 lg:pb-28">
+    <section id="converter-upload" className="relative mx-auto -mt-7 max-w-[1440px] scroll-mt-24 px-3 pb-20 sm:px-5 lg:-mt-10 lg:px-10 lg:pb-28" tabIndex={-1}>
       <div className="grid overflow-hidden border border-[#132432]/12 bg-[#f7f4ee] shadow-[0_24px_80px_rgba(19,36,50,.14)] lg:grid-cols-[minmax(0,1fr)_350px]">
         <div className="p-4 sm:p-6 lg:p-8">
           <div className="mb-5 flex flex-wrap items-end justify-between gap-4"><div><p className="label">01 / DROP FILES</p><h2 className="font-display mt-1 text-2xl font-bold tracking-[-.06em]">Convert Images Online in 3 Simple Steps</h2></div><span className="rounded-full bg-[#132432] px-3 py-1.5 text-[.67rem] font-bold tracking-[.13em] text-[#f4f0e8]">{items.length.toString().padStart(2, "0")} FILE{items.length === 1 ? "" : "S"}</span></div>
