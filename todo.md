@@ -18,7 +18,7 @@
 - [ ] Add a visible Convert Any Image favicon based on the existing navy-and-lime brand mark.
 - [ ] Build the supplied how-to, compression, privacy and emerging-format article cluster with factual capability disclosures, internal links, article metadata and BlogPosting schema.
 - [ ] Generate and integrate a distinct article visual for each guide, with descriptive alt text and responsive lazy-loaded presentation.
-- [ ] Make all article links to the converter and compressor open directly at their upload areas using reliable in-page anchors.
+- [x] Make all article links to the converter and compressor open directly at their upload areas using reliable in-page anchors.
 - [x] Reset scroll to the top for every guide-route transition while retaining smooth, sticky-header-safe scroll targets for converter and compressor links.
 
 ## Hybrid Deployment Monorepo
