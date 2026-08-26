@@ -1,8 +1,6 @@
 /**
  * Signal Utility design reminder: disclose exact capabilities and execute every available transformation locally.
  */
-import heic2any from "heic2any";
-import * as UTIF from "utif";
 
 export const outputFormats = [
   { value: "webp", label: "WEBP", ext: "webp", mime: "image/webp", family: "Popular", magick: "WebP" },
@@ -126,17 +124,17 @@ async function icoFromCanvas(source: HTMLCanvasElement, cursor = false) {
   if (cursor) { view.setUint16(10, 0, true); view.setUint16(12, 0, true); } else { view.setUint16(10, 1, true); view.setUint16(12, 32, true); } view.setUint32(14, png.length, true); view.setUint32(18, 22, true); file.set(png, 22);
   return new Blob([file], { type: "image/x-icon" });
 }
-function tiffFromCanvas(source: HTMLCanvasElement) { const { data, width, height } = pixelsFromCanvas(source); return new Blob([UTIF.encodeImage(new Uint8Array(data), width, height)], { type: "image/tiff" }); }
+async function tiffFromCanvas(source: HTMLCanvasElement) { const UTIF = await import("utif"); const { data, width, height } = pixelsFromCanvas(source); return new Blob([UTIF.encodeImage(new Uint8Array(data), width, height)], { type: "image/tiff" }); }
 async function gifFromCanvas(source: HTMLCanvasElement) {
   const { GIFEncoder, applyPalette, quantize } = await import("gifenc"); const { data, width, height } = pixelsFromCanvas(source); const palette = quantize(data, 256, { format: "rgba4444", oneBitAlpha: true }); const index = applyPalette(data, palette, "rgba4444"); const gif = GIFEncoder(); gif.writeFrame(index, width, height, { palette, repeat: -1, transparent: true }); gif.finish();
   return new Blob([gif.bytes()], { type: "image/gif" });
 }
 async function encodeCanvasOutput(source: HTMLCanvasElement, output: OutputFormat, target: (typeof outputFormats)[number]) {
-  if (output === "pdf") return pdfFromCanvas(source); if (output === "psd") return psdFromCanvas(source); if (output === "svg") return svgFromCanvas(source); if (output === "bmp") return bmpFromCanvas(source); if (output === "tga") return tgaFromCanvas(source); if (output === "tiff") return tiffFromCanvas(source); if (output === "ico") return icoFromCanvas(source); if (output === "cur") return icoFromCanvas(source, true); if (output === "gif") return gifFromCanvas(source);
+  if (output === "pdf") return pdfFromCanvas(source); if (output === "psd") return psdFromCanvas(source); if (output === "svg") return svgFromCanvas(source); if (output === "bmp") return bmpFromCanvas(source); if (output === "tga") return tgaFromCanvas(source); if (output === "tiff") return await tiffFromCanvas(source); if (output === "ico") return icoFromCanvas(source); if (output === "cur") return icoFromCanvas(source, true); if (output === "gif") return gifFromCanvas(source);
   return blobFromCanvas(source, target.mime);
 }
 async function canvasFromTiff(file: File) {
-  const buffer = await file.arrayBuffer(); const ifds = UTIF.decode(buffer); if (!ifds.length) throw new Error("The TIFF file could not be read.");
+  const UTIF = await import("utif"); const buffer = await file.arrayBuffer(); const ifds = UTIF.decode(buffer); if (!ifds.length) throw new Error("The TIFF file could not be read.");
   UTIF.decodeImage(buffer, ifds[0]); const rgba = UTIF.toRGBA8(ifds[0]);
   const canvas = document.createElement("canvas"); canvas.width = ifds[0].width; canvas.height = ifds[0].height;
   const context = canvas.getContext("2d"); if (!context) throw new Error("Canvas is unavailable.");
@@ -159,7 +157,7 @@ export async function convertImage(file: File, output: OutputFormat, onPhase?: (
   const extension = extensionOf(file.name); const target = formatFor(output);
   if (!supportedInputExtensions.has(extension)) throw new Error("This file extension is not on the supported format list.");
   if (extension === "heic" || extension === "heif") {
-    onPhase?.("decoding"); const result = await heic2any({ blob: file, toType: target.mime as "image/jpeg", quality: .92 });
+    onPhase?.("decoding"); const { default: heic2any } = await import("heic2any"); const result = await heic2any({ blob: file, toType: target.mime as "image/jpeg", quality: .92 });
     return [Array.isArray(result) ? result[0] : result];
   }
   if (browserReadyExtensions.has(extension) && nativeCanvasOutputs.has(output)) {

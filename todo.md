@@ -4,22 +4,23 @@
 - [x] Add a complete format registry with clear input/output availability, constraints, and actionable fallback states.
 - [x] Implement the widest reliable local conversion paths available for standard, vector, document, HEIC, TIFF, and RAW-family formats.
 - [x] Translate all interface, navigation, status messages, legal pages, and blog content into English.
-- [ ] Update SEO metadata, sitemap, and robots content for the English site.
-- [ ] Test conversion and compression flows, review responsive pages, and confirm the production build.
+- [x] Update SEO metadata, sitemap, and robots content for the English site.
+- [x] Test conversion and compression flows, review responsive pages, and confirm the production build.
 - [x] Fix the standard PNG-to-PDF browser conversion route so it uses the native canvas decoder and client-side PDF encoder instead of the unstable WASM decoder.
 - [ ] Diagnose why the live site still shows the prior PNG-to-PDF WASM failure, then verify the deployed conversion request reprocesses correctly.
 - [x] Expand the conversion selector’s reliable batch-output behavior while keeping unsupported browser-only conversions explicit and routed to the local Docker fallback.
-- [ ] Repair the conversion interface and key pages for mobile viewport usability.
+- [x] Repair the conversion interface and key pages for mobile viewport usability.
 - [x] Replace the public standard-image-to-PSD Docker dependency with a browser-only PSD encoder so PSD output works on mobile and desktop without a local service.
 - [x] Show each uploaded image as a thumbnail preview in the conversion queue so users can identify the selected file before converting it.
 - [x] Replace failing standard-image public outputs (SVG, ICO, CUR, TIFF, BMP, GIF and TGA) with browser-safe encoders, and hide JXL, HDR and EXR until a reliable public path exists.
-- [ ] Add truthful homepage SEO metadata, keyword-led headings, conversion guidance, FAQ markup and structured data without claiming unverified usage, offline mode or unlimited file sizes.
-- [ ] Add truthful compression-page SEO metadata, keyword-led content, use cases, FAQ markup and structured data without guaranteeing 90% savings, lossless results or offline operation.
-- [ ] Add a visible Convert Any Image favicon based on the existing navy-and-lime brand mark.
-- [ ] Build the supplied how-to, compression, privacy and emerging-format article cluster with factual capability disclosures, internal links, article metadata and BlogPosting schema.
-- [ ] Generate and integrate a distinct article visual for each guide, with descriptive alt text and responsive lazy-loaded presentation.
+- [x] Add truthful homepage SEO metadata, keyword-led headings, conversion guidance, FAQ markup and structured data without claiming unverified usage, offline mode or unlimited file sizes.
+- [x] Add truthful compression-page SEO metadata, keyword-led content, use cases, FAQ markup and structured data without guaranteeing 90% savings, lossless results or offline operation.
+- [x] Add a visible Convert Any Image favicon based on the existing navy-and-lime brand mark.
+- [x] Build the supplied how-to, compression, privacy and emerging-format article cluster with factual capability disclosures, internal links, article metadata and BlogPosting schema.
+- [ ] Generate and integrate a distinct article visual for each guide, with descriptive alt text and responsive lazy-loaded presentation. First 10 covers are live; the remaining 10 require image-generation quota availability.
 - [x] Make all article links to the converter and compressor open directly at their upload areas using reliable in-page anchors.
-- [x] Reset scroll to the top for every guide-route transition while retaining smooth, sticky-header-safe scroll targets for converter and compressor links.
+- [x] Reset scroll to the top for every guide-route transition while retaining sticky-header-safe upload targets for converter and compressor links.
+- [x] Reduce first-load work for modern Safari and Firefox, serve generated article covers from public image URLs, and provide graceful visual fallbacks and upload-area landing behavior.
 
 ## Hybrid Deployment Monorepo
 

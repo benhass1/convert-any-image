@@ -1,5 +1,5 @@
 /** Signal Utility design reminder: compression is measurable, privacy-forward and never promises a fixed saving or lossless result. */
-import { ChangeEvent, DragEvent, useRef, useState } from "react";
+import { ChangeEvent, DragEvent, useLayoutEffect, useRef, useState } from "react";
 import { ArrowDownToLine, Check, ChevronDown, ImageDown, LoaderCircle, LockKeyhole, Plus, SlidersHorizontal, X } from "lucide-react";
 import SiteShell from "@/components/SiteShell";
 import Seo from "@/components/Seo";
@@ -7,6 +7,7 @@ import { convertImage, downloadBlob, extensionOf, prettySize } from "@/lib/image
 
 type Preset = "smaller" | "balanced" | "preserve";
 type Item = { id: string; file: File; result?: Blob; status: "queued" | "working" | "done" | "failed"; error?: string };
+const fileId = () => globalThis.crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random().toString(36).slice(2)}`;
 
 const privacyImage = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1200' height='675' viewBox='0 0 1200 675'%3E%3Crect width='1200' height='675' fill='%23132432'/%3E%3Cpath d='M70 70H1130V605H70z' fill='none' stroke='%23b7f840' stroke-width='4' opacity='.55'/%3E%3Crect x='610' y='145' width='330' height='300' fill='%2341525d'/%3E%3Cpath d='M730 45V570M430 300H1080' stroke='%23b7f840' stroke-width='8' opacity='.6'/%3E%3C/svg%3E";
 const presets: Record<Preset, { label: string; detail: string; quality: number }> = {
@@ -49,7 +50,8 @@ export default function Compress() {
   const [scale, setScale] = useState(100);
   const [preset, setPreset] = useState<Preset>("balanced");
   const [dragging, setDragging] = useState(false);
-  const add = (files: FileList | File[]) => setItems((current) => [...current, ...Array.from(files).filter((file) => file.type.startsWith("image/") || /\.(heic|heif)$/i.test(file.name)).map((file) => ({ id: crypto.randomUUID(), file, status: "queued" as const }))]);
+  useLayoutEffect(() => { document.querySelector('[aria-label="Visual quality"]')?.closest("section")?.setAttribute("id", "compress-upload"); }, []);
+  const add = (files: FileList | File[]) => setItems((current) => [...current, ...Array.from(files).filter((file) => file.type.startsWith("image/") || /\.(heic|heif)$/i.test(file.name)).map((file) => ({ id: fileId(), file, status: "queued" as const }))]);
   const update = (id: string, change: Partial<Item>) => setItems((current) => current.map((item) => item.id === id ? { ...item, ...change } : item));
   const choosePreset = (next: Preset) => { setPreset(next); setQuality(Math.round(presets[next].quality * 100)); };
   const run = async () => {

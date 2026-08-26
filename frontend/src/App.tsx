@@ -3,17 +3,20 @@
  */
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { useLayoutEffect } from "react";
+import { lazy, Suspense, useLayoutEffect } from "react";
 import { Route, Switch, useLocation } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
-import Home from "./pages/Home";
-import NotFound from "./pages/NotFound";
-import Compress from "./pages/Compress";
-import { BlogArticle, BlogIndex } from "./pages/Blog";
-import { About, Legal } from "./pages/InfoPages";
 
-function ScrollManager() { const [location] = useLocation(); useLayoutEffect(() => { const hash = window.location.hash.slice(1); const target = document.getElementById(hash) ?? (hash === "compress-upload" ? document.querySelector('[aria-label="Visual quality"]')?.closest("section") : null); if (target) { const top = target.getBoundingClientRect().top + window.scrollY - 92; window.scrollTo({ top, left: 0, behavior: "auto" }); return; } window.scrollTo({ top: 0, left: 0, behavior: "auto" }); }, [location]); return null; }
-function Router() { return <><ScrollManager/><Switch><Route path="/" component={Home} /><Route path="/compress" component={Compress}/><Route path="/blog" component={BlogIndex}/><Route path="/blog/:slug" component={BlogArticle}/><Route path="/about" component={About}/><Route path="/privacy">{() => <Legal kind="privacy"/>}</Route><Route path="/terms">{() => <Legal kind="terms"/>}</Route><Route path="/cookie-policy">{() => <Legal kind="cookies"/>}</Route><Route path="/404" component={NotFound} /><Route component={NotFound} /></Switch></>; }
+const Home = lazy(() => import("./pages/Home"));
+const NotFound = lazy(() => import("./pages/NotFound"));
+const Compress = lazy(() => import("./pages/Compress"));
+const BlogIndex = lazy(() => import("./pages/Blog").then(({ BlogIndex }) => ({ default: BlogIndex })));
+const BlogArticle = lazy(() => import("./pages/Blog").then(({ BlogArticle }) => ({ default: BlogArticle })));
+const About = lazy(() => import("./pages/InfoPages").then(({ About }) => ({ default: About })));
+const Legal = lazy(() => import("./pages/InfoPages").then(({ Legal }) => ({ default: Legal })));
+
+function ScrollManager() { const [location] = useLocation(); useLayoutEffect(() => { const priorScrollRestoration = window.history.scrollRestoration; let frame = 0; let attempts = 0; window.history.scrollRestoration = "manual"; const scrollToRouteTarget = () => { window.cancelAnimationFrame(frame); const hash = window.location.hash.slice(1); const target = hash ? document.getElementById(hash) ?? (hash === "compress-upload" ? document.querySelector('[aria-label="Visual quality"]')?.closest("section") : null) : null; if (target) { const top = target.getBoundingClientRect().top + window.scrollY - 92; window.scrollTo({ top, left: 0, behavior: "auto" }); return; } if (hash && attempts < 3) { attempts += 1; frame = window.requestAnimationFrame(scrollToRouteTarget); return; } window.scrollTo({ top: 0, left: 0, behavior: "auto" }); }; scrollToRouteTarget(); const onHashChange = () => { attempts = 0; scrollToRouteTarget(); }; window.addEventListener("hashchange", onHashChange); return () => { window.cancelAnimationFrame(frame); window.removeEventListener("hashchange", onHashChange); window.history.scrollRestoration = priorScrollRestoration; }; }, [location]); return null; }
+function Router() { return <Suspense fallback={<main className="min-h-screen bg-[#f7f4ee]" aria-label="Loading page"/>}><ScrollManager/><Switch><Route path="/" component={Home} /><Route path="/compress" component={Compress}/><Route path="/blog" component={BlogIndex}/><Route path="/blog/:slug" component={BlogArticle}/><Route path="/about" component={About}/><Route path="/privacy">{() => <Legal kind="privacy"/>}</Route><Route path="/terms">{() => <Legal kind="terms"/>}</Route><Route path="/cookie-policy">{() => <Legal kind="cookies"/>}</Route><Route path="/404" component={NotFound} /><Route component={NotFound} /></Switch></Suspense>; }
 
 export default function App() { return <ErrorBoundary><ThemeProvider defaultTheme="light"><TooltipProvider><Toaster /><Router /></TooltipProvider></ThemeProvider></ErrorBoundary>; }

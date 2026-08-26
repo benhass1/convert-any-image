@@ -9,6 +9,7 @@ import { convertImage, downloadBlob, extensionOf, formatFor, formatRegistry, Out
 
 type Stage = "queued" | ProcessingPhase | "done" | "failed";
 type ConversionItem = { id: string; file: File; previewUrl: string; output: OutputFormat; stage: Stage; results?: Blob[]; error?: string };
+const fileId = () => globalThis.crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random().toString(36).slice(2)}`;
 
 const heroUrl = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1600' height='900' viewBox='0 0 1600 900'%3E%3Crect width='1600' height='900' fill='%23132432'/%3E%3Cg stroke='%23b7f840' stroke-opacity='.35' fill='none'%3E%3Cpath d='M1000 0V900M1200 0V900M1400 0V900M0 160H1600M0 360H1600M0 560H1600M0 760H1600'/%3E%3Crect x='980' y='180' width='400' height='270' stroke-width='8'/%3E%3Ccircle cx='1200' cy='315' r='105' stroke-width='22'/%3E%3C/g%3E%3C/svg%3E";
 const phaseCopy: Record<Stage, string> = { queued: "QUEUED", "loading-engine": "LOADING", decoding: "DECODING", converting: "CONVERTING", packaging: "PACKAGING", done: "READY", failed: "RETRY" };
@@ -29,7 +30,7 @@ export default function Home() {
   const addFiles = (files: FileList | File[]) => {
     const incoming = Array.from(files);
     const invalid = incoming.filter((file) => !supportedInputExtensions.has(extensionOf(file.name)));
-    const accepted = incoming.filter((file) => supportedInputExtensions.has(extensionOf(file.name))).map((file) => { const previewUrl = URL.createObjectURL(file); previewUrls.current.add(previewUrl); return { id: crypto.randomUUID(), file, previewUrl, output: globalOutput, stage: "queued" as Stage }; });
+    const accepted = incoming.filter((file) => supportedInputExtensions.has(extensionOf(file.name))).map((file) => { const previewUrl = URL.createObjectURL(file); previewUrls.current.add(previewUrl); return { id: fileId(), file, previewUrl, output: globalOutput, stage: "queued" as Stage }; });
     if (invalid.length) setNotice(`${invalid.length} file${invalid.length === 1 ? " was" : "s were"} skipped because the extension is not in the supported registry.`);
     if (accepted.length) setItems((current) => [...current, ...accepted]);
   };
