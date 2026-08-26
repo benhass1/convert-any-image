@@ -15,20 +15,19 @@ Cloudflare Pages has recognised both CNAME records, completed certificate valida
 
 ## GitHub Actions Secrets
 
-The workflow files are committed in the private repository at [benhass1/convert-any-image](https://github.com/benhass1/convert-any-image). The currently connected GitHub integration cannot write Actions secrets, so add these values once through the GitHub web interface.
+The workflow files are committed in the private repository at [benhass1/convert-any-image](https://github.com/benhass1/convert-any-image). The connected GitHub integration cannot write Actions secrets, so they were added once through the GitHub web interface. Both workflow reruns now complete successfully.
 
 1. Sign in to GitHub as an owner of `benhass1/convert-any-image`.
 2. Open **Settings** → **Secrets and variables** → **Actions**.
-3. Select **New repository secret** and create the three secrets below. Never commit their values in a file.
+3. Select **New repository secret** and create the two secrets below. Never commit their values in a file.
 
 | Secret name | Value to enter | Used by |
 |---|---|---|
-| `CLOUDFLARE_API_KEY` | Your Cloudflare Global API Key | Cloudflare Pages and Worker deploy workflows |
-| `CLOUDFLARE_EMAIL` | `benmhamed.hassan@gmail.com` | Cloudflare Pages and Worker deploy workflows |
+| `CLOUDFLARE_API_TOKEN` | A newly created scoped Cloudflare token with **Cloudflare Pages — Edit** and **Workers Scripts — Edit** permissions | Cloudflare Pages and Worker deploy workflows |
 | `CLOUDFLARE_ACCOUNT_ID` | `e1160d5046d96aefb9bd8b35df4e5047` | Cloudflare Pages and Worker deploy workflows |
 
-4. Open the **Actions** tab and rerun the most recent workflow, or make a small commit to `main`, to verify the deployment credentials work.
-5. When the workflows have been confirmed, rotate the Global API Key and replace it with a least-privilege API token. Update the workflow only after the token has equivalent Pages and Worker deployment permissions.
+4. Open the **Actions** tab and rerun the most recent workflows to verify the deployment credentials work.
+5. Once both deployments pass, revoke any previous exposed Global API Key. The workflows use `CLOUDFLARE_API_TOKEN` and do not require `CLOUDFLARE_API_KEY` or `CLOUDFLARE_EMAIL`.
 
 ## DNS and HTTPS Checks
 
@@ -39,4 +38,4 @@ https://convertanyimage.com
 https://www.convertanyimage.com
 ```
 
-The transcript Worker is already configured to accept browser requests from both custom-domain origins as well as the Pages fallback hostname. After a preferred hostname is selected, add a Cloudflare Redirect Rule to send the other hostname to it; otherwise, both hostnames will continue to serve the same site.
+The transcript Worker is configured to accept browser requests from both custom-domain origins as well as the Pages fallback hostname. The apex hostname is canonical: Cloudflare Redirect Rules now send `www.convertanyimage.com/*` to `https://convertanyimage.com/${1}` with HTTP 301 and query-string preservation. This behavior was independently verified with a redirected request that ended at the canonical home page with HTTP 200.

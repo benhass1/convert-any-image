@@ -56,5 +56,7 @@
 - [x] Attach `convertanyimage.com` and `www.convertanyimage.com` to the Cloudflare Pages project using the safe DNS records.
 - [x] Update and verify Worker CORS for the custom domain after HTTPS issuance.
 - [x] Validate root-domain, `www` and Pages fallback behavior after DNS propagation. All three hostnames return HTTP 200 and both Pages custom domains are active.
-- [ ] Create the scoped Cloudflare API token, save `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` in GitHub Actions secrets, test both workflows, and then revoke the exposed Global API Key.
+- [x] Create the scoped Cloudflare API token, save `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` in GitHub Actions secrets, verify both deployment workflows, and revoke the exposed Global API Key.
 - [x] Remove the duplicate pnpm-version declaration that blocked the GitHub Actions frontend deployment before Cloudflare authentication ran.
+- [x] Replace the malformed `CLOUDFLARE_ACCOUNT_ID` GitHub secret with the exact single-line account ID, then rerun both deployment workflows successfully.
+- [x] Redirect `www.convertanyimage.com` to `convertanyimage.com` with a 301 rule that preserves the path and query string.
