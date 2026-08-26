@@ -3,6 +3,7 @@
  */
 import heic2any from "heic2any";
 import * as UTIF from "utif";
+import { convertWithLocalBackend } from "./heavy-converter-client";
 
 export const outputFormats = [
   { value: "webp", label: "WEBP", ext: "webp", mime: "image/webp", family: "Popular", magick: "WebP" },
@@ -11,6 +12,7 @@ export const outputFormats = [
   { value: "avif", label: "AVIF", ext: "avif", mime: "image/avif", family: "Popular", magick: "Avif" },
   { value: "svg", label: "SVG", ext: "svg", mime: "image/svg+xml", family: "Vector & document", magick: "Svg" },
   { value: "pdf", label: "PDF", ext: "pdf", mime: "application/pdf", family: "Vector & document", magick: "Pdf" },
+  { value: "psd", label: "PSD", ext: "psd", mime: "image/vnd.adobe.photoshop", family: "Advanced local", magick: "Psd" },
   { value: "ico", label: "ICO", ext: "ico", mime: "image/x-icon", family: "Specialty", magick: "Ico" },
   { value: "cur", label: "CUR", ext: "cur", mime: "image/x-icon", family: "Specialty", magick: "Cur" },
   { value: "tiff", label: "TIFF", ext: "tiff", mime: "image/tiff", family: "Specialty", magick: "Tiff" },
@@ -25,7 +27,7 @@ export const outputFormats = [
 export type OutputFormat = (typeof outputFormats)[number]["value"];
 export type ProcessingPhase = "loading-engine" | "decoding" | "converting" | "packaging";
 
-type FormatStatus = "native" | "wasm";
+type FormatStatus = "native" | "wasm" | "local";
 export type FormatDescriptor = { label: string; extensions: string[]; status: FormatStatus; category: string; direction: "Input & output" | "Input only" };
 
 export const formatRegistry: FormatDescriptor[] = [
@@ -49,7 +51,7 @@ export const formatRegistry: FormatDescriptor[] = [
   { label: "Adobe DNG", extensions: ["dng"], status: "wasm", category: "Camera RAW", direction: "Input only" },
   { label: "Fujifilm RAW", extensions: ["raf"], status: "wasm", category: "Camera RAW", direction: "Input only" },
   { label: "Panasonic RAW", extensions: ["rw2"], status: "wasm", category: "Camera RAW", direction: "Input only" },
-  { label: "Photoshop", extensions: ["psd"], status: "wasm", category: "Design & HDR", direction: "Input & output" },
+  { label: "Photoshop", extensions: ["psd"], status: "local", category: "Design & HDR", direction: "Input & output" },
   { label: "Targa", extensions: ["tga"], status: "wasm", category: "Design & HDR", direction: "Input & output" },
   { label: "OpenEXR", extensions: ["exr"], status: "wasm", category: "Design & HDR", direction: "Input & output" },
   { label: "Radiance HDR", extensions: ["hdr"], status: "wasm", category: "Design & HDR", direction: "Input & output" },
@@ -57,6 +59,8 @@ export const formatRegistry: FormatDescriptor[] = [
 
 export const supportedInputExtensions = new Set(formatRegistry.flatMap((format) => format.extensions));
 export const browserReadyExtensions = new Set(["jpg", "jpeg", "png", "webp", "avif", "gif", "bmp", "tif", "tiff", "ico", "heic", "heif", "svg"]);
+const nativeCanvasOutputs = new Set<OutputFormat>(["jpg", "png", "webp", "avif", "pdf"]);
+const localBackendOutputs = new Set<OutputFormat>(["pdf", "psd", "tiff", "bmp", "gif", "ico", "tga"]);
 
 let magickLoad: Promise<typeof import("@imagemagick/magick-wasm")> | null = null;
 
@@ -123,9 +127,14 @@ export async function convertImage(file: File, output: OutputFormat, onPhase?: (
     onPhase?.("decoding"); const result = await heic2any({ blob: file, toType: target.mime as "image/jpeg", quality: .92 });
     return [Array.isArray(result) ? result[0] : result];
   }
-  if (browserReadyExtensions.has(extension) && (["jpg", "png", "webp", "avif"].includes(output) || output === "pdf")) {
+  if (browserReadyExtensions.has(extension) && nativeCanvasOutputs.has(output)) {
     onPhase?.("decoding"); const canvas = extension === "tif" || extension === "tiff" ? await canvasFromTiff(file) : await canvasFromStandardImage(file);
     onPhase?.("converting"); return [output === "pdf" ? await pdfFromCanvas(canvas) : await blobFromCanvas(canvas, target.mime)];
+  }
+  if (localBackendOutputs.has(output)) {
+    onPhase?.("loading-engine");
+    try { onPhase?.("converting"); return [await convertWithLocalBackend(file, output)]; }
+    catch { throw new Error(`${target.label} output requires the optional local Docker converter. Start it on this device, then retry.`); }
   }
   onPhase?.("loading-engine");
   try { onPhase?.("decoding"); const results = await convertWithMagick(file, output); onPhase?.("converting"); return results; }

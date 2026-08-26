@@ -7,14 +7,14 @@ import subprocess
 import tempfile
 from pathlib import Path
 
-from fastapi import FastAPI, File, HTTPException, UploadFile
+from fastapi import FastAPI, File, Form, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from starlette.background import BackgroundTask
 
 ALLOWED_ORIGINS = [origin.strip() for origin in os.getenv("ALLOWED_ORIGINS", "http://localhost:5173").split(",") if origin.strip()]
 MAX_UPLOAD_BYTES = int(os.getenv("MAX_UPLOAD_MB", "100")) * 1024 * 1024
-ALLOWED_OUTPUTS = {"jpg": "jpg", "png": "png", "webp": "webp", "avif": "avif", "tiff": "tiff", "bmp": "bmp", "gif": "gif", "ico": "ico", "tga": "tga", "pdf": "pdf"}
+ALLOWED_OUTPUTS = {"jpg": "jpg", "png": "png", "webp": "webp", "avif": "avif", "tiff": "tiff", "bmp": "bmp", "gif": "gif", "ico": "ico", "tga": "tga", "pdf": "pdf", "psd": "psd"}
 
 app = FastAPI(title="Convert Any Image Local Backend", docs_url=None, redoc_url=None)
 app.add_middleware(CORSMiddleware, allow_origins=ALLOWED_ORIGINS, allow_credentials=False, allow_methods=["POST", "GET"], allow_headers=["Content-Type"])
@@ -24,7 +24,7 @@ def health() -> dict[str, str]:
     return {"status": "ok", "mode": "local-only"}
 
 @app.post("/api/convert")
-async def convert(file: UploadFile = File(...), output_format: str = "webp") -> FileResponse:
+async def convert(file: UploadFile = File(...), output_format: str = Form("webp")) -> FileResponse:
     normalized_output = output_format.lower().strip()
     if normalized_output not in ALLOWED_OUTPUTS:
         raise HTTPException(status_code=400, detail="Unsupported output format.")

@@ -7,6 +7,9 @@
 - [ ] Update SEO metadata, sitemap, and robots content for the English site.
 - [ ] Test conversion and compression flows, review responsive pages, and confirm the production build.
 - [x] Fix the standard PNG-to-PDF browser conversion route so it uses the native canvas decoder and client-side PDF encoder instead of the unstable WASM decoder.
+- [ ] Diagnose why the live site still shows the prior PNG-to-PDF WASM failure, then verify the deployed conversion request reprocesses correctly.
+- [x] Expand the conversion selector’s reliable batch-output behavior while keeping unsupported browser-only conversions explicit and routed to the local Docker fallback.
+- [x] Repair the conversion interface and key pages for mobile viewport usability.
 
 ## Hybrid Deployment Monorepo
 
