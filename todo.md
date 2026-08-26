@@ -15,7 +15,8 @@
 - [x] Replace failing standard-image public outputs (SVG, ICO, CUR, TIFF, BMP, GIF and TGA) with browser-safe encoders, and hide JXL, HDR and EXR until a reliable public path exists.
 - [ ] Add truthful homepage SEO metadata, keyword-led headings, conversion guidance, FAQ markup and structured data without claiming unverified usage, offline mode or unlimited file sizes.
 - [ ] Add truthful compression-page SEO metadata, keyword-led content, use cases, FAQ markup and structured data without guaranteeing 90% savings, lossless results or offline operation.
-- [x] Add a visible Convert Any Image favicon based on the existing navy-and-lime brand mark.
+- [ ] Add a visible Convert Any Image favicon based on the existing navy-and-lime brand mark.
+- [ ] Build the supplied how-to, compression, privacy and emerging-format article cluster with factual capability disclosures, internal links, article metadata and BlogPosting schema.
 
 ## Hybrid Deployment Monorepo
 
