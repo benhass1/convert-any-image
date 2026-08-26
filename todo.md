@@ -47,4 +47,12 @@
 - [x] Publish the validated `frontend/dist` artifact to the reserved Cloudflare Pages project.
 - [x] Update the live transcript Worker to permit the Cloudflare Pages production origin.
 - [ ] Store the Cloudflare deployment token and account identifier in GitHub Actions secrets, then verify workflow access. Blocked: the installed GitHub integration has no Actions-secret permission (HTTP 403).
-- [x] Test the public Pages site and its allowed-origin transcript API request.
+- [ ] Test the public Pages site and its allowed-origin transcript API request.
+
+## Custom Domain and Automation Handoff
+
+- [x] Inspect the Cloudflare zone, Pages domain attachment and existing DNS records for `convertanyimage.com`.
+- [x] Provide the exact GitHub Actions-secret creation steps and permission requirement.
+- [x] Attach `convertanyimage.com` and `www.convertanyimage.com` to the Cloudflare Pages project using the safe DNS records.
+- [x] Update and verify Worker CORS for the custom domain after HTTPS issuance.
+- [x] Validate root-domain, `www` and Pages fallback behavior after DNS propagation. All three hostnames return HTTP 200 and both Pages custom domains are active.

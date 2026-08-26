@@ -57,3 +57,7 @@ The Docker converter intentionally has no cloud deployment workflow. Keep it loc
 ## Security Model
 
 The repository ignores environment files, package dependencies, Python caches and Docker runtime directories. Deployment credentials are supplied as GitHub repository secrets; frontend endpoint URLs are public Vite build configuration; Cloudflare origin and cache settings are ordinary worker configuration. Read [SECRETS_SETUP.md](./SECRETS_SETUP.md) before enabling the workflows.
+
+## Custom Domain
+
+See [CUSTOM_DOMAIN_SETUP.md](./CUSTOM_DOMAIN_SETUP.md) for the current `convertanyimage.com` Pages-domain configuration, the DNS records in use and the GitHub Actions-secret handoff.

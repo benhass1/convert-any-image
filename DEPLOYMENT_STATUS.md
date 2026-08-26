@@ -1,6 +1,6 @@
 # Cloudflare Deployment Status
 
-**Verified public frontend:** https://convert-any-image.pages.dev
+**Verified public frontend:** https://convertanyimage.com (also available at https://www.convertanyimage.com and https://convert-any-image.pages.dev)
 
 **Verified transcript Worker:** https://convert-any-image-transcript.benmhamed-hassan.workers.dev/v1/transcript
 

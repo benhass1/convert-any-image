@@ -19,7 +19,7 @@ The production frontend defaults to the deployed transcript Worker URL. Optional
 
 ## Cloudflare Worker and Pages Origin
 
-The Worker CORS policy accepts a comma-separated `ALLOWED_ORIGINS` list. It currently permits the reserved `https://convert-any-image.pages.dev` hostname and the intended `https://convertanyimage.com` custom domain. Remove the Pages fallback after custom-domain cutover if you want a single-origin policy. `CACHE_TTL_SECONDS` controls the Cache API response lifetime; the default is one day.
+The Worker CORS policy accepts a comma-separated `ALLOWED_ORIGINS` list. It currently permits the reserved `https://convert-any-image.pages.dev` hostname plus `https://convertanyimage.com` and `https://www.convertanyimage.com`. Remove unused origins after final routing decisions if you want a narrower policy. `CACHE_TTL_SECONDS` controls the Cache API response lifetime; the default is one day.
 
 ## Local Docker Configuration
 
