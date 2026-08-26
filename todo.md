@@ -43,8 +43,8 @@
 
 ## Authorized Cloudflare Deployment
 
-- [ ] Validate the supplied Cloudflare credential without printing or committing it.
-- [ ] Publish the validated `frontend/dist` artifact to the reserved Cloudflare Pages project.
-- [ ] Update the live transcript Worker to permit the Cloudflare Pages production origin.
-- [ ] Store the Cloudflare deployment token and account identifier in GitHub Actions secrets, then verify workflow access.
-- [ ] Test the public Pages site and its allowed-origin transcript API request.
+- [x] Validate the supplied Cloudflare credential without printing or committing it.
+- [x] Publish the validated `frontend/dist` artifact to the reserved Cloudflare Pages project.
+- [x] Update the live transcript Worker to permit the Cloudflare Pages production origin.
+- [ ] Store the Cloudflare deployment token and account identifier in GitHub Actions secrets, then verify workflow access. Blocked: the installed GitHub integration has no Actions-secret permission (HTTP 403).
+- [x] Test the public Pages site and its allowed-origin transcript API request.
