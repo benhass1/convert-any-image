@@ -1,12 +1,17 @@
 # Cloudflare Deployment Credentials
 
-This repository contains no deployment tokens, API keys or private endpoint credentials. The frontend and transcript API both deploy through Cloudflare. Add the values below in **GitHub repository settings → Secrets and variables → Actions** before enabling the deployment workflows on `main`.
+This repository contains no deployment tokens, API keys or private endpoint credentials. The frontend and transcript API both deploy through Cloudflare. Add the two values below in **GitHub repository settings → Secrets and variables → Actions** before triggering the deployment workflows on `main`.
 
-| Secret | Used by | Source and purpose |
+| Secret | Used by | Value and purpose |
 |---|---|---|
-| `CLOUDFLARE_API_KEY` | Both deployment workflows | A Cloudflare Global API Key used by Wrangler with the account email. Prefer replacing it with a least-privilege API token when account permissions allow. |
-| `CLOUDFLARE_EMAIL` | Both deployment workflows | The Cloudflare account email paired with the Global API Key. |
-| `CLOUDFLARE_ACCOUNT_ID` | Both deployment workflows | The identifier of the Cloudflare account owning the Pages project and Worker. |
+| `CLOUDFLARE_API_TOKEN` | Both deployment workflows | A newly created, scoped Cloudflare API token. It replaces the Global API Key and grants only the deployment permissions needed by Wrangler. |
+| `CLOUDFLARE_ACCOUNT_ID` | Both deployment workflows | `e1160d5046d96aefb9bd8b35df4e5047`, the identifier of the account owning the Pages project and Worker. |
+
+## Create the scoped API token
+
+In Cloudflare, open **My Profile** → **API Tokens** → **Create Token** → **Create Custom Token**. Give it a clear name such as `github-convert-any-image-deploy`. Under **Account Resources**, select the account that owns `convert-any-image`. Add the following **Account** permissions with **Edit** access: **Cloudflare Pages** and **Workers Scripts**. Save the token, copy it once, then immediately add it to GitHub as `CLOUDFLARE_API_TOKEN`. Do not place it in a repository file, a `VITE_*` variable or ordinary GitHub Actions variable.
+
+After the new token has been saved in GitHub and one successful deployment has completed, revoke the previously exposed Global API Key in **My Profile** → **API Keys**. The workflows no longer require `CLOUDFLARE_API_KEY` or `CLOUDFLARE_EMAIL`.
 
 ## Public Build Configuration
 
@@ -29,4 +34,4 @@ The heavy converter remains independent of both Cloudflare deployments. Set `ALL
 
 ## Initial Setup Sequence
 
-Create the Cloudflare Pages project named `convert-any-image`, build the Vite app from `frontend`, and publish `frontend/dist`. Confirm the Pages hostname, update the Worker CORS origin, then add the two Cloudflare GitHub secrets. The path-filtered workflows deploy the frontend and Worker independently after a push to `main`.
+The Cloudflare Pages project named `convert-any-image` and its custom domains are already active. Add `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID`, then trigger the two path-filtered workflows independently after a push to `main`.
