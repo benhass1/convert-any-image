@@ -1,20 +1,21 @@
 /**
  * Signal Utility design reminder: keep conversion capabilities explicit, local and mobile-usable.
  */
-import { ChangeEvent, DragEvent, useMemo, useRef, useState } from "react";
+import { ChangeEvent, DragEvent, useEffect, useMemo, useRef, useState } from "react";
 import { AlertTriangle, ArrowDownToLine, ArrowRight, Box, Check, ChevronDown, Files, FolderUp, LoaderCircle, LockKeyhole, Plus, ScanLine, X } from "lucide-react";
 import SiteShell from "@/components/SiteShell";
 import Seo from "@/components/Seo";
 import { convertImage, downloadBlob, extensionOf, formatFor, formatRegistry, OutputFormat, outputFormats, prettySize, ProcessingPhase, supportedInputExtensions } from "@/lib/image-processing";
 
 type Stage = "queued" | ProcessingPhase | "done" | "failed";
-type ConversionItem = { id: string; file: File; output: OutputFormat; stage: Stage; results?: Blob[]; error?: string };
+type ConversionItem = { id: string; file: File; previewUrl: string; output: OutputFormat; stage: Stage; results?: Blob[]; error?: string };
 
 const heroUrl = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1600' height='900' viewBox='0 0 1600 900'%3E%3Crect width='1600' height='900' fill='%23132432'/%3E%3Cg stroke='%23b7f840' stroke-opacity='.35' fill='none'%3E%3Cpath d='M1000 0V900M1200 0V900M1400 0V900M0 160H1600M0 360H1600M0 560H1600M0 760H1600'/%3E%3Crect x='980' y='180' width='400' height='270' stroke-width='8'/%3E%3Ccircle cx='1200' cy='315' r='105' stroke-width='22'/%3E%3C/g%3E%3C/svg%3E";
 const phaseCopy: Record<Stage, string> = { queued: "QUEUED", "loading-engine": "LOADING", decoding: "DECODING", converting: "CONVERTING", packaging: "PACKAGING", done: "READY", failed: "RETRY" };
 
 export default function Home() {
   const fileInput = useRef<HTMLInputElement>(null);
+  const previewUrls = useRef(new Set<string>());
   const [items, setItems] = useState<ConversionItem[]>([]);
   const [globalOutput, setGlobalOutput] = useState<OutputFormat>("webp");
   const [isDragging, setIsDragging] = useState(false);
@@ -22,16 +23,19 @@ export default function Home() {
   const [notice, setNotice] = useState<string | null>(null);
   const groupedFormats = useMemo(() => Array.from(new Set(formatRegistry.map((format) => format.category))).map((category) => ({ category, formats: formatRegistry.filter((format) => format.category === category) })), []);
 
+  useEffect(() => () => { previewUrls.current.forEach((url) => URL.revokeObjectURL(url)); }, []);
+
   const patchItem = (id: string, change: Partial<ConversionItem>) => setItems((current) => current.map((item) => item.id === id ? { ...item, ...change } : item));
   const addFiles = (files: FileList | File[]) => {
     const incoming = Array.from(files);
     const invalid = incoming.filter((file) => !supportedInputExtensions.has(extensionOf(file.name)));
-    const accepted = incoming.filter((file) => supportedInputExtensions.has(extensionOf(file.name))).map((file) => ({ id: crypto.randomUUID(), file, output: globalOutput, stage: "queued" as Stage }));
+    const accepted = incoming.filter((file) => supportedInputExtensions.has(extensionOf(file.name))).map((file) => { const previewUrl = URL.createObjectURL(file); previewUrls.current.add(previewUrl); return { id: crypto.randomUUID(), file, previewUrl, output: globalOutput, stage: "queued" as Stage }; });
     if (invalid.length) setNotice(`${invalid.length} file${invalid.length === 1 ? " was" : "s were"} skipped because the extension is not in the supported registry.`);
     if (accepted.length) setItems((current) => [...current, ...accepted]);
   };
   const onChange = (event: ChangeEvent<HTMLInputElement>) => { if (event.target.files) addFiles(event.target.files); event.target.value = ""; };
   const onDrop = (event: DragEvent<HTMLDivElement>) => { event.preventDefault(); setIsDragging(false); if (event.dataTransfer.files.length) addFiles(event.dataTransfer.files); };
+  const removeItem = (id: string) => setItems((current) => { const item = current.find((entry) => entry.id === id); if (item) { URL.revokeObjectURL(item.previewUrl); previewUrls.current.delete(item.previewUrl); } return current.filter((entry) => entry.id !== id); });
   const changeGlobalOutput = (output: OutputFormat) => { setGlobalOutput(output); setItems((current) => current.map((item) => item.stage === "queued" || item.stage === "failed" ? { ...item, output } : item)); };
   const convertAll = async () => {
     const queue = items.filter((item) => item.stage === "queued" || item.stage === "failed");
@@ -86,7 +90,7 @@ export default function Home() {
             <input ref={fileInput} type="file" className="hidden" multiple accept="image/*,.heic,.heif,.jxl,.svg,.eps,.pdf,.cr2,.cr3,.nef,.arw,.dng,.raf,.rw2,.psd,.tga,.exr,.hdr,.cur" onChange={onChange}/>
           </div>
           {notice && <div className="mt-4 flex items-start gap-3 border border-[#b68122]/30 bg-[#fff3cf] p-3 text-sm text-[#6a4814]"><AlertTriangle className="mt-.5 h-4 w-4 shrink-0"/><span>{notice}</span><button className="ml-auto" onClick={() => setNotice(null)} aria-label="Dismiss notice"><X className="h-4 w-4"/></button></div>}
-          {items.length > 0 && <div className="mt-5 overflow-hidden border border-[#132432]/10 bg-white"><div className="hidden grid-cols-[minmax(0,1fr)_120px_120px_40px] items-center gap-3 border-b border-[#132432]/10 bg-[#f1eee7] px-4 py-3 text-[.64rem] font-bold tracking-[.13em] text-[#65727b] sm:grid"><span>FILE</span><span>OUTPUT</span><span>STATUS</span><span/></div>{items.map((item) => <FileRow key={item.id} item={item} onOutput={(output) => patchItem(item.id, { output, stage: "queued", error: undefined, results: undefined })} onRemove={() => setItems((current) => current.filter((entry) => entry.id !== item.id))} onDownload={() => downloadItem(item)}/>)}</div>}
+          {items.length > 0 && <div className="mt-5 overflow-hidden border border-[#132432]/10 bg-white"><div className="hidden grid-cols-[minmax(0,1fr)_120px_120px_40px] items-center gap-3 border-b border-[#132432]/10 bg-[#f1eee7] px-4 py-3 text-[.64rem] font-bold tracking-[.13em] text-[#65727b] sm:grid"><span>FILE</span><span>OUTPUT</span><span>STATUS</span><span/></div>{items.map((item) => <FileRow key={item.id} item={item} onOutput={(output) => patchItem(item.id, { output, stage: "queued", error: undefined, results: undefined })} onRemove={() => removeItem(item.id)} onDownload={() => downloadItem(item)}/>)}</div>}
           <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between"><button onClick={() => fileInput.current?.click()} className="inline-flex items-center gap-2 self-start text-sm font-bold text-[#41525d] hover:text-[#132432]"><Plus className="h-4 w-4"/>Add files</button><div className="grid w-full grid-cols-2 gap-2 sm:flex sm:w-auto sm:flex-wrap sm:gap-3"><button disabled={!complete} onClick={downloadAll} className="action-secondary justify-center"><ArrowDownToLine className="h-4 w-4"/>Download {complete > 1 ? "ZIP" : "file"}</button><button disabled={!items.length || isConverting} onClick={convertAll} className="action-primary justify-center">{isConverting ? <LoaderCircle className="h-4 w-4 animate-spin"/> : <ArrowRight className="h-4 w-4"/>}{isConverting ? `${working || 1} running` : "Convert all"}</button></div></div>
         </div>
         <aside className="border-t border-[#132432]/12 bg-[#132432] p-5 text-[#f4f0e8] sm:p-6 lg:border-l lg:border-t-0 lg:p-8"><p className="label text-[#b7f840]">02 / CHOOSE OUTPUT</p><h2 className="font-display mt-1 text-2xl font-bold tracking-[-.06em]">Target format</h2><label className="relative mt-6 block"><span className="mb-2 block text-[.67rem] font-bold tracking-[.13em] text-[#d8d2c5]/60">GLOBAL SETTING</span><select value={globalOutput} onChange={(event) => changeGlobalOutput(event.target.value as OutputFormat)} className="w-full appearance-none border border-[#f4f0e8]/20 bg-[#19313f] px-4 py-3.5 pr-9 font-display text-lg font-bold tracking-[-.04em] outline-none focus:border-[#b7f840]">{outputFormats.map((format) => <option key={format.value} value={format.value}>{format.label} — {format.family}</option>)}</select><ChevronDown className="pointer-events-none absolute bottom-4 right-3.5 h-4 w-4 text-[#b7f840]"/></label><div className="mt-7 max-h-[355px] space-y-5 overflow-y-auto pr-1">{groupedFormats.map((group) => <div key={group.category}><p className="mb-2 text-[.61rem] font-bold tracking-[.14em] text-[#d8d2c5]/50">{group.category.toUpperCase()}</p><div className="flex flex-wrap gap-1.5">{group.formats.map((format) => <span key={format.label} title={`${format.direction}; ${format.status === "native" ? "fast browser path" : "loaded on demand through ImageMagick WASM"}`} className={`border px-2 py-1 text-[.62rem] font-bold tracking-[.06em] ${format.status === "native" ? "border-[#b7f840]/35 text-[#b7f840]" : "border-[#f4f0e8]/18 text-[#d8d2c5]/78"}`}>{format.extensions.map((extension) => extension.toUpperCase()).join("/")}</span>)}</div></div>)}</div><div className="mt-7 border-t border-[#f4f0e8]/16 pt-5"><div className="flex gap-3"><Box className="mt-.5 h-4 w-4 shrink-0 text-[#b7f840]"/><p className="text-sm leading-6 text-[#d8d2c5]/80"><strong className="font-semibold text-[#f4f0e8]">Complete registry.</strong> Green tags use a browser-native route, including PSD export for standard images; grey tags load WASM when needed.</p></div></div></aside>
@@ -97,11 +101,16 @@ export default function Home() {
   </main></SiteShell>;
 }
 
+function FileThumbnail({ item, ext }: { item: ConversionItem; ext: string }) {
+  const [hasPreviewError, setHasPreviewError] = useState(false);
+  return <div className="relative h-11 w-11 shrink-0 overflow-hidden border border-[#132432]/15 bg-[#132432] shadow-sm"><img src={item.previewUrl} alt={`Preview of ${item.file.name}`} onError={() => setHasPreviewError(true)} className={`h-full w-full object-cover ${hasPreviewError ? "hidden" : "block"}`}/>{hasPreviewError && <span className="grid h-full w-full place-items-center px-1 text-center text-[.55rem] font-bold text-[#b7f840]">{ext.slice(0, 4)}</span>}<span className="absolute bottom-0 left-0 bg-[#132432]/85 px-1 py-[1px] text-[.46rem] font-bold tracking-[.08em] text-[#f4f0e8]">PREVIEW</span></div>;
+}
+
 function FileRow({ item, onOutput, onRemove, onDownload }: { item: ConversionItem; onOutput: (output: OutputFormat) => void; onRemove: () => void; onDownload: () => void }) {
   const ext = extensionOf(item.file.name).toUpperCase(); const resultSize = item.results?.reduce((total, result) => total + result.size, 0);
   const status = <span className={`flex items-center gap-1.5 text-[.61rem] font-bold tracking-[.07em] ${item.stage === "done" ? "text-[#5c7820]" : item.stage === "failed" ? "text-[#a1442a]" : "text-[#65727b]"}`}>{item.stage === "done" ? <Check className="h-3.5 w-3.5"/> : item.stage === "queued" ? <span className="h-1.5 w-1.5 rounded-full bg-current"/> : <LoaderCircle className="h-3.5 w-3.5 animate-spin"/>}{phaseCopy[item.stage]}</span>;
   const action = item.stage === "done" ? <button onClick={onDownload} className="grid h-8 w-8 place-items-center text-[#132432] hover:bg-[#b7f840]" aria-label="Download"><ArrowDownToLine className="h-4 w-4"/></button> : <button onClick={onRemove} className="grid h-8 w-8 place-items-center text-[#65727b] hover:bg-[#ede6dd] hover:text-[#132432]" aria-label="Remove"><X className="h-4 w-4"/></button>;
-  return <div className="border-b border-[#132432]/8 px-3 py-3 last:border-b-0 sm:grid sm:grid-cols-[minmax(0,1fr)_120px_120px_40px] sm:items-center sm:gap-3 sm:px-4"><div className="min-w-0"><div className="flex items-center gap-2"><span className="grid h-8 w-8 shrink-0 place-items-center bg-[#132432] text-[.58rem] font-bold text-[#b7f840]">{ext.slice(0, 4)}</span><div className="min-w-0"><p className="truncate text-sm font-bold">{item.file.name}</p><p className="mt-.5 text-xs text-[#65727b]">{prettySize(item.file.size)}{resultSize ? ` → ${prettySize(resultSize)}` : ""}</p></div></div>{item.error && <p className="mt-1 max-w-md text-xs leading-4 text-[#a1442a]">{item.error}</p>}</div><div className="mt-3 flex items-center gap-2 sm:contents"><select value={item.output} disabled={item.stage !== "queued" && item.stage !== "failed"} onChange={(event) => onOutput(event.target.value as OutputFormat)} className="min-w-0 flex-1 border border-[#132432]/14 bg-white px-2 py-2 text-xs font-bold outline-none disabled:opacity-60 sm:w-auto sm:flex-none">{outputFormats.map((format) => <option key={format.value} value={format.value}>{format.label}</option>)}</select><div className="min-w-[75px] sm:min-w-0">{status}</div>{action}</div></div>;
+  return <div className="border-b border-[#132432]/8 px-3 py-3 last:border-b-0 sm:grid sm:grid-cols-[minmax(0,1fr)_120px_120px_40px] sm:items-center sm:gap-3 sm:px-4"><div className="min-w-0"><div className="flex items-center gap-3"><FileThumbnail item={item} ext={ext}/><div className="min-w-0"><p className="truncate text-sm font-bold">{item.file.name}</p><p className="mt-.5 text-xs text-[#65727b]">{prettySize(item.file.size)}{resultSize ? ` → ${prettySize(resultSize)}` : ""}</p></div></div>{item.error && <p className="mt-1 max-w-md text-xs leading-4 text-[#a1442a]">{item.error}</p>}</div><div className="mt-3 flex items-center gap-2 sm:contents"><select value={item.output} disabled={item.stage !== "queued" && item.stage !== "failed"} onChange={(event) => onOutput(event.target.value as OutputFormat)} className="min-w-0 flex-1 border border-[#132432]/14 bg-white px-2 py-2 text-xs font-bold outline-none disabled:opacity-60 sm:w-auto sm:flex-none">{outputFormats.map((format) => <option key={format.value} value={format.value}>{format.label}</option>)}</select><div className="min-w-[75px] sm:min-w-0">{status}</div>{action}</div></div>;
 }
 
 function StatCard({ count, title, description }: { count: string; title: string; description: string }) { return <div className="border-l-2 border-[#b7f840] bg-[#f7f4ee] p-5"><p className="text-[.66rem] font-bold tracking-[.14em] text-[#5c7820]">{count}</p><h3 className="font-display mt-2 text-lg font-bold tracking-[-.04em]">{title}</h3><p className="mt-2 text-sm leading-6 text-[#52616a]">{description}</p></div>; }

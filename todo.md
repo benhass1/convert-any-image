@@ -11,6 +11,7 @@
 - [x] Expand the conversion selector’s reliable batch-output behavior while keeping unsupported browser-only conversions explicit and routed to the local Docker fallback.
 - [ ] Repair the conversion interface and key pages for mobile viewport usability.
 - [x] Replace the public standard-image-to-PSD Docker dependency with a browser-only PSD encoder so PSD output works on mobile and desktop without a local service.
+- [x] Show each uploaded image as a thumbnail preview in the conversion queue so users can identify the selected file before converting it.
 
 ## Hybrid Deployment Monorepo
 
