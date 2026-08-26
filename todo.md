@@ -21,6 +21,7 @@
 - [x] Make all article links to the converter and compressor open directly at their upload areas using reliable in-page anchors.
 - [x] Reset scroll to the top for every guide-route transition while retaining sticky-header-safe upload targets for converter and compressor links.
 - [x] Reduce first-load work for modern Safari and Firefox, serve generated article covers from public image URLs, and provide graceful visual fallbacks and upload-area landing behavior.
+- [ ] Add the supplied Google Search Console verification meta tag to the homepage head and confirm it on the live domain.
 
 ## Hybrid Deployment Monorepo
 
