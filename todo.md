@@ -40,3 +40,11 @@
 - [ ] Resolve the blocked Cloudflare dashboard session and repair or reinstall the Cloudflare Pages GitHub integration for `benhass1/convert-any-image`.
 - [ ] Recreate the Pages project with GitHub source configuration once the Cloudflare Git installation is healthy.
 - [ ] Confirm the automatic production build completes from the `main` branch before enabling the GitHub Actions fallback workflow.
+
+## Authorized Cloudflare Deployment
+
+- [ ] Validate the supplied Cloudflare credential without printing or committing it.
+- [ ] Publish the validated `frontend/dist` artifact to the reserved Cloudflare Pages project.
+- [ ] Update the live transcript Worker to permit the Cloudflare Pages production origin.
+- [ ] Store the Cloudflare deployment token and account identifier in GitHub Actions secrets, then verify workflow access.
+- [ ] Test the public Pages site and its allowed-origin transcript API request.

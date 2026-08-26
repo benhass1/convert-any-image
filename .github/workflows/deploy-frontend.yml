@@ -38,9 +38,8 @@ jobs:
           VITE_WORKER_URL: https://convert-any-image-transcript.benmhamed-hassan.workers.dev
           VITE_LOCAL_BACKEND_URL: http://localhost:8000
       - name: Deploy to Cloudflare Pages
-        uses: cloudflare/wrangler-action@v3
-        with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          workingDirectory: frontend
-          command: pages deploy dist --project-name=convert-any-image --branch=main
+        run: pnpm --dir worker exec wrangler pages deploy frontend/dist --project-name=convert-any-image --branch=main --commit-message="${{ github.event.head_commit.message }}"
+        env:
+          CLOUDFLARE_API_KEY: ${{ secrets.CLOUDFLARE_API_KEY }}
+          CLOUDFLARE_EMAIL: ${{ secrets.CLOUDFLARE_EMAIL }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}

@@ -4,7 +4,8 @@ This repository contains no deployment tokens, API keys or private endpoint cred
 
 | Secret | Used by | Source and purpose |
 |---|---|---|
-| `CLOUDFLARE_API_TOKEN` | Both deployment workflows | A renewable, account-scoped Cloudflare API token allowed to deploy Cloudflare Pages and the `convert-any-image-transcript` Worker. |
+| `CLOUDFLARE_API_KEY` | Both deployment workflows | A Cloudflare Global API Key used by Wrangler with the account email. Prefer replacing it with a least-privilege API token when account permissions allow. |
+| `CLOUDFLARE_EMAIL` | Both deployment workflows | The Cloudflare account email paired with the Global API Key. |
 | `CLOUDFLARE_ACCOUNT_ID` | Both deployment workflows | The identifier of the Cloudflare account owning the Pages project and Worker. |
 
 ## Public Build Configuration
