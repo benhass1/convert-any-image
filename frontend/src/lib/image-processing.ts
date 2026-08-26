@@ -3,7 +3,6 @@
  */
 import heic2any from "heic2any";
 import * as UTIF from "utif";
-import { convertWithLocalBackend } from "./heavy-converter-client";
 
 export const outputFormats = [
   { value: "webp", label: "WEBP", ext: "webp", mime: "image/webp", family: "Popular", magick: "WebP" },
@@ -19,9 +18,6 @@ export const outputFormats = [
   { value: "bmp", label: "BMP", ext: "bmp", mime: "image/bmp", family: "Specialty", magick: "Bmp" },
   { value: "gif", label: "GIF", ext: "gif", mime: "image/gif", family: "Specialty", magick: "Gif" },
   { value: "tga", label: "TGA", ext: "tga", mime: "image/x-tga", family: "Specialty", magick: "Tga" },
-  { value: "jxl", label: "JXL", ext: "jxl", mime: "image/jxl", family: "Specialty", magick: "Jxl" },
-  { value: "hdr", label: "HDR", ext: "hdr", mime: "image/vnd.radiance", family: "Specialty", magick: "Hdr" },
-  { value: "exr", label: "EXR", ext: "exr", mime: "image/x-exr", family: "Specialty", magick: "Exr" },
 ] as const;
 
 export type OutputFormat = (typeof outputFormats)[number]["value"];
@@ -59,8 +55,7 @@ export const formatRegistry: FormatDescriptor[] = [
 
 export const supportedInputExtensions = new Set(formatRegistry.flatMap((format) => format.extensions));
 export const browserReadyExtensions = new Set(["jpg", "jpeg", "png", "webp", "avif", "gif", "bmp", "tif", "tiff", "ico", "heic", "heif", "svg"]);
-const nativeCanvasOutputs = new Set<OutputFormat>(["jpg", "png", "webp", "avif", "pdf", "psd"]);
-const localBackendOutputs = new Set<OutputFormat>(["tiff", "bmp", "gif", "ico", "tga"]);
+const nativeCanvasOutputs = new Set<OutputFormat>(["jpg", "png", "webp", "avif", "svg", "pdf", "psd", "ico", "cur", "tiff", "bmp", "gif", "tga"]);
 
 let magickLoad: Promise<typeof import("@imagemagick/magick-wasm")> | null = null;
 
@@ -106,6 +101,40 @@ async function psdFromCanvas(source: HTMLCanvasElement) {
   const bytes = writePsd({ width: source.width, height: source.height, children: [{ name: "Converted image", canvas: source }] });
   return new Blob([bytes], { type: "image/vnd.adobe.photoshop" });
 }
+function pixelsFromCanvas(source: HTMLCanvasElement) {
+  const context = source.getContext("2d"); if (!context) throw new Error("Canvas is unavailable.");
+  return context.getImageData(0, 0, source.width, source.height);
+}
+async function dataUrlFromBlob(blob: Blob) { return await new Promise<string>((resolve, reject) => { const reader = new FileReader(); reader.onload = () => resolve(String(reader.result)); reader.onerror = () => reject(new Error("The image preview could not be encoded.")); reader.readAsDataURL(blob); }); }
+async function svgFromCanvas(source: HTMLCanvasElement) {
+  const png = await blobFromCanvas(source, "image/png"); const imageData = await dataUrlFromBlob(png);
+  return new Blob([`<svg xmlns="http://www.w3.org/2000/svg" width="${source.width}" height="${source.height}" viewBox="0 0 ${source.width} ${source.height}"><image href="${imageData}" width="${source.width}" height="${source.height}"/></svg>`], { type: "image/svg+xml" });
+}
+function bmpFromCanvas(source: HTMLCanvasElement) {
+  const { data, width, height } = pixelsFromCanvas(source); const rowSize = Math.ceil((width * 3) / 4) * 4; const file = new Uint8Array(54 + rowSize * height); const view = new DataView(file.buffer);
+  file[0] = 0x42; file[1] = 0x4d; view.setUint32(2, file.length, true); view.setUint32(10, 54, true); view.setUint32(14, 40, true); view.setInt32(18, width, true); view.setInt32(22, height, true); view.setUint16(26, 1, true); view.setUint16(28, 24, true); view.setUint32(34, rowSize * height, true);
+  let offset = 54; for (let y = height - 1; y >= 0; y--) { for (let x = 0; x < width; x++) { const pixel = (y * width + x) * 4; file[offset++] = data[pixel + 2]; file[offset++] = data[pixel + 1]; file[offset++] = data[pixel]; } offset += rowSize - width * 3; }
+  return new Blob([file], { type: "image/bmp" });
+}
+function tgaFromCanvas(source: HTMLCanvasElement) {
+  const { data, width, height } = pixelsFromCanvas(source); const file = new Uint8Array(18 + width * height * 4); file[2] = 2; file[12] = width & 255; file[13] = width >> 8; file[14] = height & 255; file[15] = height >> 8; file[16] = 32; file[17] = 0x28;
+  for (let index = 0, offset = 18; index < data.length; index += 4) { file[offset++] = data[index + 2]; file[offset++] = data[index + 1]; file[offset++] = data[index]; file[offset++] = data[index + 3]; }
+  return new Blob([file], { type: "image/x-tga" });
+}
+async function icoFromCanvas(source: HTMLCanvasElement, cursor = false) {
+  const png = new Uint8Array(await (await blobFromCanvas(source, "image/png")).arrayBuffer()); const file = new Uint8Array(22 + png.length); const view = new DataView(file.buffer); view.setUint16(2, cursor ? 2 : 1, true); view.setUint16(4, 1, true); file[6] = source.width >= 256 ? 0 : source.width; file[7] = source.height >= 256 ? 0 : source.height;
+  if (cursor) { view.setUint16(10, 0, true); view.setUint16(12, 0, true); } else { view.setUint16(10, 1, true); view.setUint16(12, 32, true); } view.setUint32(14, png.length, true); view.setUint32(18, 22, true); file.set(png, 22);
+  return new Blob([file], { type: "image/x-icon" });
+}
+function tiffFromCanvas(source: HTMLCanvasElement) { const { data, width, height } = pixelsFromCanvas(source); return new Blob([UTIF.encodeImage(new Uint8Array(data), width, height)], { type: "image/tiff" }); }
+async function gifFromCanvas(source: HTMLCanvasElement) {
+  const { GIFEncoder, applyPalette, quantize } = await import("gifenc"); const { data, width, height } = pixelsFromCanvas(source); const palette = quantize(data, 256, { format: "rgba4444", oneBitAlpha: true }); const index = applyPalette(data, palette, "rgba4444"); const gif = GIFEncoder(); gif.writeFrame(index, width, height, { palette, repeat: -1, transparent: true }); gif.finish();
+  return new Blob([gif.bytes()], { type: "image/gif" });
+}
+async function encodeCanvasOutput(source: HTMLCanvasElement, output: OutputFormat, target: (typeof outputFormats)[number]) {
+  if (output === "pdf") return pdfFromCanvas(source); if (output === "psd") return psdFromCanvas(source); if (output === "svg") return svgFromCanvas(source); if (output === "bmp") return bmpFromCanvas(source); if (output === "tga") return tgaFromCanvas(source); if (output === "tiff") return tiffFromCanvas(source); if (output === "ico") return icoFromCanvas(source); if (output === "cur") return icoFromCanvas(source, true); if (output === "gif") return gifFromCanvas(source);
+  return blobFromCanvas(source, target.mime);
+}
 async function canvasFromTiff(file: File) {
   const buffer = await file.arrayBuffer(); const ifds = UTIF.decode(buffer); if (!ifds.length) throw new Error("The TIFF file could not be read.");
   UTIF.decodeImage(buffer, ifds[0]); const rgba = UTIF.toRGBA8(ifds[0]);
@@ -135,12 +164,7 @@ export async function convertImage(file: File, output: OutputFormat, onPhase?: (
   }
   if (browserReadyExtensions.has(extension) && nativeCanvasOutputs.has(output)) {
     onPhase?.("decoding"); const canvas = extension === "tif" || extension === "tiff" ? await canvasFromTiff(file) : await canvasFromStandardImage(file);
-    onPhase?.("converting"); return [output === "pdf" ? await pdfFromCanvas(canvas) : output === "psd" ? await psdFromCanvas(canvas) : await blobFromCanvas(canvas, target.mime)];
-  }
-  if (localBackendOutputs.has(output)) {
-    onPhase?.("loading-engine");
-    try { onPhase?.("converting"); return [await convertWithLocalBackend(file, output)]; }
-    catch { throw new Error(`${target.label} output requires the optional local Docker converter. Start it on this device, then retry.`); }
+    onPhase?.("converting"); return [await encodeCanvasOutput(canvas, output, target)];
   }
   onPhase?.("loading-engine");
   try { onPhase?.("decoding"); const results = await convertWithMagick(file, output); onPhase?.("converting"); return results; }
