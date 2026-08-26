@@ -9,7 +9,8 @@
 - [x] Fix the standard PNG-to-PDF browser conversion route so it uses the native canvas decoder and client-side PDF encoder instead of the unstable WASM decoder.
 - [ ] Diagnose why the live site still shows the prior PNG-to-PDF WASM failure, then verify the deployed conversion request reprocesses correctly.
 - [x] Expand the conversion selector’s reliable batch-output behavior while keeping unsupported browser-only conversions explicit and routed to the local Docker fallback.
-- [x] Repair the conversion interface and key pages for mobile viewport usability.
+- [ ] Repair the conversion interface and key pages for mobile viewport usability.
+- [x] Replace the public standard-image-to-PSD Docker dependency with a browser-only PSD encoder so PSD output works on mobile and desktop without a local service.
 
 ## Hybrid Deployment Monorepo
 

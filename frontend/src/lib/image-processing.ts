@@ -51,7 +51,7 @@ export const formatRegistry: FormatDescriptor[] = [
   { label: "Adobe DNG", extensions: ["dng"], status: "wasm", category: "Camera RAW", direction: "Input only" },
   { label: "Fujifilm RAW", extensions: ["raf"], status: "wasm", category: "Camera RAW", direction: "Input only" },
   { label: "Panasonic RAW", extensions: ["rw2"], status: "wasm", category: "Camera RAW", direction: "Input only" },
-  { label: "Photoshop", extensions: ["psd"], status: "local", category: "Design & HDR", direction: "Input & output" },
+  { label: "Photoshop", extensions: ["psd"], status: "native", category: "Design & HDR", direction: "Input & output" },
   { label: "Targa", extensions: ["tga"], status: "wasm", category: "Design & HDR", direction: "Input & output" },
   { label: "OpenEXR", extensions: ["exr"], status: "wasm", category: "Design & HDR", direction: "Input & output" },
   { label: "Radiance HDR", extensions: ["hdr"], status: "wasm", category: "Design & HDR", direction: "Input & output" },
@@ -59,8 +59,8 @@ export const formatRegistry: FormatDescriptor[] = [
 
 export const supportedInputExtensions = new Set(formatRegistry.flatMap((format) => format.extensions));
 export const browserReadyExtensions = new Set(["jpg", "jpeg", "png", "webp", "avif", "gif", "bmp", "tif", "tiff", "ico", "heic", "heif", "svg"]);
-const nativeCanvasOutputs = new Set<OutputFormat>(["jpg", "png", "webp", "avif", "pdf"]);
-const localBackendOutputs = new Set<OutputFormat>(["pdf", "psd", "tiff", "bmp", "gif", "ico", "tga"]);
+const nativeCanvasOutputs = new Set<OutputFormat>(["jpg", "png", "webp", "avif", "pdf", "psd"]);
+const localBackendOutputs = new Set<OutputFormat>(["tiff", "bmp", "gif", "ico", "tga"]);
 
 let magickLoad: Promise<typeof import("@imagemagick/magick-wasm")> | null = null;
 
@@ -100,6 +100,12 @@ async function pdfFromCanvas(source: HTMLCanvasElement) {
   page.addImage(flattened.toDataURL("image/jpeg", .92), "JPEG", 0, 0, page.internal.pageSize.getWidth(), page.internal.pageSize.getHeight(), undefined, "FAST");
   return page.output("blob");
 }
+async function psdFromCanvas(source: HTMLCanvasElement) {
+  const { initializeCanvas, writePsd } = await import("ag-psd");
+  initializeCanvas((width, height) => { const canvas = document.createElement("canvas"); canvas.width = width; canvas.height = height; return canvas; });
+  const bytes = writePsd({ width: source.width, height: source.height, children: [{ name: "Converted image", canvas: source }] });
+  return new Blob([bytes], { type: "image/vnd.adobe.photoshop" });
+}
 async function canvasFromTiff(file: File) {
   const buffer = await file.arrayBuffer(); const ifds = UTIF.decode(buffer); if (!ifds.length) throw new Error("The TIFF file could not be read.");
   UTIF.decodeImage(buffer, ifds[0]); const rgba = UTIF.toRGBA8(ifds[0]);
@@ -129,7 +135,7 @@ export async function convertImage(file: File, output: OutputFormat, onPhase?: (
   }
   if (browserReadyExtensions.has(extension) && nativeCanvasOutputs.has(output)) {
     onPhase?.("decoding"); const canvas = extension === "tif" || extension === "tiff" ? await canvasFromTiff(file) : await canvasFromStandardImage(file);
-    onPhase?.("converting"); return [output === "pdf" ? await pdfFromCanvas(canvas) : await blobFromCanvas(canvas, target.mime)];
+    onPhase?.("converting"); return [output === "pdf" ? await pdfFromCanvas(canvas) : output === "psd" ? await psdFromCanvas(canvas) : await blobFromCanvas(canvas, target.mime)];
   }
   if (localBackendOutputs.has(output)) {
     onPhase?.("loading-engine");
