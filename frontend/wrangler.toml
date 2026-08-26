@@ -1,0 +1,4 @@
+# Signal Utility: static Vite frontend published to Cloudflare Pages; no secrets belong here.
+name = "convert-any-image"
+pages_build_output_dir = "dist"
+compatibility_date = "2026-08-26"

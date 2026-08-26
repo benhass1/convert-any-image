@@ -1,18 +1,18 @@
 # Convert Any Image Monorepo
 
-Convert Any Image is organised as a hybrid deployment: the public Vite frontend is deployed to Vercel, the lightweight YouTube transcript endpoint runs at the Cloudflare edge, and heavy conversions remain in a Docker container controlled by the operator. The split keeps large or sensitive files out of the public cloud workflow while allowing the UI and transcript cache to stay fast.
+Convert Any Image is organised as a Cloudflare-first hybrid deployment: the public Vite frontend runs on Cloudflare Pages, the lightweight YouTube transcript endpoint runs at the Cloudflare edge, and heavy conversions remain in a Docker container controlled by the operator. The split keeps large or sensitive files out of the public cloud workflow while allowing the UI and transcript cache to stay fast.
 
 | Directory | Runtime | Responsibility |
 |---|---|---|
-| `frontend/` | Vite + React | Public UI deployed to Vercel. It reads only public endpoint configuration from `VITE_*` variables. |
+| `frontend/` | Vite + React | Public UI deployed to Cloudflare Pages. It reads only public endpoint configuration from `VITE_*` variables. |
 | `worker/` | Cloudflare Workers | Transcript API with request validation, strict CORS and Cache API reuse. |
 | `local-backend/` | Docker + FastAPI | Operator-controlled heavy conversion service using ImageMagick and local OS codecs. |
 | `shared/` | TypeScript source | Framework-neutral request and response contracts. |
-| `.github/workflows/` | GitHub Actions | Path-filtered production workflows for Vercel and Cloudflare. |
+| `.github/workflows/` | GitHub Actions | Path-filtered production workflows for Cloudflare Pages and Workers. |
 
 ## Prerequisites
 
-Use Node.js 22 and pnpm 10 for the JavaScript workspaces. Run Docker on the machine that will perform heavy local conversions. Vercel and Cloudflare accounts are only required when you are ready to deploy the public frontend and edge worker.
+Use Node.js 22 and pnpm 10 for the JavaScript workspaces. Run Docker on the machine that will perform heavy local conversions. A Cloudflare account is required when you are ready to deploy the public frontend and edge worker.
 
 ## Local Frontend
 
@@ -34,7 +34,7 @@ pnpm --dir worker install
 pnpm dev:worker
 ```
 
-Set the final Vercel origin in `worker/wrangler.toml` before deploying. For production, publish through the GitHub workflow after completing [SECRETS_SETUP.md](./SECRETS_SETUP.md).
+Set the final Cloudflare Pages origin in `worker/wrangler.toml` before deploying. For production, publish through the GitHub workflow after completing [SECRETS_SETUP.md](./SECRETS_SETUP.md).
 
 ## Local Docker Converter
 
@@ -50,10 +50,10 @@ The health endpoint is available at `http://localhost:8000/health`. The conversi
 
 ## CI/CD
 
-`deploy-frontend.yml` runs only when `frontend/`, `shared/` or its workflow changes on `main`. It uses Vercel’s documented CLI sequence: pull the production environment, build, then deploy the prebuilt artifact. Configure the Vercel project root directory as `frontend`; its `vercel.json` installs workspace dependencies from the parent directory and emits `frontend/dist`. `deploy-worker.yml` runs only when `worker/` or its workflow changes and uses Cloudflare’s Wrangler action to publish the Worker.
+`deploy-frontend.yml` runs only when `frontend/`, `shared/` or its workflow changes on `main`. It installs the root workspace, validates and builds `frontend`, then publishes `frontend/dist` to the `convert-any-image` Cloudflare Pages project. `deploy-worker.yml` runs only when `worker/` or its workflow changes and uses Cloudflare’s Wrangler action to publish the Worker.
 
 The Docker converter intentionally has no cloud deployment workflow. Keep it local, connect it to the frontend with `VITE_LOCAL_BACKEND_URL`, and expose it only through a trusted network path if remote access is needed.
 
 ## Security Model
 
-The repository ignores environment files, package dependencies, Python caches and Docker runtime directories. GitHub credentials are supplied as repository secrets; Vercel public URLs are project environment variables; Cloudflare origin and cache settings are ordinary worker configuration. Read [SECRETS_SETUP.md](./SECRETS_SETUP.md) before enabling the workflows.
+The repository ignores environment files, package dependencies, Python caches and Docker runtime directories. Deployment credentials are supplied as GitHub repository secrets; frontend endpoint URLs are public Vite build configuration; Cloudflare origin and cache settings are ordinary worker configuration. Read [SECRETS_SETUP.md](./SECRETS_SETUP.md) before enabling the workflows.

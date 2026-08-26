@@ -1,34 +1,31 @@
-# CI/CD Secret Setup
+# Cloudflare Deployment Credentials
 
-This repository intentionally contains no deployment tokens, API keys or private endpoint credentials. Add the values below in **GitHub repository settings → Secrets and variables → Actions** before merging the first production deployment to `main`.
+This repository contains no deployment tokens, API keys or private endpoint credentials. The frontend and transcript API both deploy through Cloudflare. Add the values below in **GitHub repository settings → Secrets and variables → Actions** before enabling the deployment workflows on `main`.
 
 | Secret | Used by | Source and purpose |
 |---|---|---|
-| `VERCEL_TOKEN` | `deploy-frontend.yml` | A Vercel personal or team token that can create production deployments for the selected project. |
-| `VERCEL_ORG_ID` | `deploy-frontend.yml` | The Vercel team or personal account ID connected to the project. |
-| `VERCEL_PROJECT_ID` | `deploy-frontend.yml` | The Vercel project ID for the `frontend` application. |
-| `CLOUDFLARE_API_TOKEN` | `deploy-worker.yml` | A scoped Cloudflare token with Workers deployment permission for the target account. |
-| `CLOUDFLARE_ACCOUNT_ID` | `deploy-worker.yml` | The Cloudflare account identifier that owns the Worker. |
+| `CLOUDFLARE_API_TOKEN` | Both deployment workflows | A renewable, account-scoped Cloudflare API token allowed to deploy Cloudflare Pages and the `convert-any-image-transcript` Worker. |
+| `CLOUDFLARE_ACCOUNT_ID` | Both deployment workflows | The identifier of the Cloudflare account owning the Pages project and Worker. |
 
-## Vercel Environment Variables
+## Public Build Configuration
 
-Set the following as **Production** environment variables in the Vercel project, not as GitHub secrets. They are browser-visible configuration values and must contain no credentials.
+The production frontend defaults to the deployed transcript Worker URL. Optional `VITE_*` build variables may override this in a controlled build environment, but they are browser-visible and must never contain credentials.
 
-| Variable | Example | Purpose |
+| Variable | Default | Purpose |
 |---|---|---|
-| `VITE_WORKER_URL` | `https://transcript-api.example.workers.dev` | Base URL used by the frontend transcript client. |
+| `VITE_WORKER_URL` | `https://convert-any-image-transcript.benmhamed-hassan.workers.dev` | Base URL used by the frontend transcript client. |
 | `VITE_LOCAL_BACKEND_URL` | `http://localhost:8000` | URL for a converter run by the user on a trusted local network. Do not point this at a public Docker host without separate authentication and network controls. |
 
-## Cloudflare Worker Variables
+## Cloudflare Worker and Pages Origin
 
-`worker/wrangler.toml` includes non-secret worker variables. Before production deployment, set `ALLOWED_ORIGIN` to the exact Vercel custom domain, for example `https://convertanyimage.com`. This prevents browsers from other origins from calling the transcript endpoint. `CACHE_TTL_SECONDS` controls the Cache API response lifetime; the default is one day.
+The Worker CORS policy accepts a comma-separated `ALLOWED_ORIGINS` list. It currently permits the reserved `https://convert-any-image.pages.dev` hostname and the intended `https://convertanyimage.com` custom domain. Remove the Pages fallback after custom-domain cutover if you want a single-origin policy. `CACHE_TTL_SECONDS` controls the Cache API response lifetime; the default is one day.
 
 ## Local Docker Configuration
 
-Copy `local-backend/.env.template` to `local-backend/.env` only on the machine that will run the converter. Restrict `ALLOWED_ORIGINS` to the browser origin that can reach that machine. The local backend is deliberately excluded from both cloud deployment workflows and should not receive cloud secrets.
+The heavy converter remains independent of both Cloudflare deployments. Set `ALLOWED_ORIGINS` and `MAX_UPLOAD_MB` when launching the local container if the safe defaults need changing; do not give the container Cloudflare or GitHub credentials.
 
-> `VITE_*` variables are embedded in the browser bundle by Vite. Never put a Vercel token, Cloudflare token, YouTube credential, or any other secret in a `VITE_*` variable.
+> `VITE_*` variables are embedded in the browser bundle. Never put a Cloudflare token, GitHub token, YouTube credential, or any other secret in a `VITE_*` variable.
 
 ## Initial Setup Sequence
 
-First create the Vercel project and set its root directory to `frontend`, where `vercel.json` installs the root workspace and builds the Vite package. Next create the Cloudflare Worker, then update `ALLOWED_ORIGIN` to the final frontend origin. Add the GitHub secrets, set the two Vercel environment variables, and only then push the workflows to `main`.
+Create the Cloudflare Pages project named `convert-any-image`, build the Vite app from `frontend`, and publish `frontend/dist`. Confirm the Pages hostname, update the Worker CORS origin, then add the two Cloudflare GitHub secrets. The path-filtered workflows deploy the frontend and Worker independently after a push to `main`.

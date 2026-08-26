@@ -4,6 +4,6 @@ compatibility_date = "2026-08-26"
 workers_dev = true
 
 [vars]
-# Replace with the production Vercel custom domain before deployment.
-ALLOWED_ORIGIN = "https://convertanyimage.com"
+# Cloudflare Pages hostname plus the intended custom domain during DNS cutover.
+ALLOWED_ORIGINS = "https://convert-any-image.pages.dev,https://convertanyimage.com"
 CACHE_TTL_SECONDS = "86400"

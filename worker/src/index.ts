@@ -1,5 +1,5 @@
 export interface Env {
-  ALLOWED_ORIGIN: string;
+  ALLOWED_ORIGINS: string;
   CACHE_TTL_SECONDS: string;
 }
 
@@ -9,8 +9,10 @@ const jsonHeaders = { "Content-Type": "application/json; charset=UTF-8" };
 
 function corsHeaders(request: Request, env: Env) {
   const origin = request.headers.get("Origin");
-  if (origin && origin !== env.ALLOWED_ORIGIN) return null;
-  return { "Access-Control-Allow-Origin": env.ALLOWED_ORIGIN, "Access-Control-Allow-Methods": "POST, OPTIONS", "Access-Control-Allow-Headers": "Content-Type", "Vary": "Origin" };
+  const allowedOrigins = env.ALLOWED_ORIGINS.split(",").map((value) => value.trim()).filter(Boolean);
+  if (origin && !allowedOrigins.includes(origin)) return null;
+  const allowedOrigin = origin && allowedOrigins.includes(origin) ? origin : allowedOrigins[0];
+  return { "Access-Control-Allow-Origin": allowedOrigin, "Access-Control-Allow-Methods": "POST, OPTIONS", "Access-Control-Allow-Headers": "Content-Type", "Vary": "Origin" };
 }
 function response(body: unknown, status: number, cors: HeadersInit) { return new Response(JSON.stringify(body), { status, headers: { ...jsonHeaders, ...cors } }); }
 function cacheKey(request: Request, videoId: string, language: string) { const url = new URL(request.url); url.pathname = `/__cache/transcript/${videoId}/${language}`; url.search = ""; return new Request(url.toString()); }

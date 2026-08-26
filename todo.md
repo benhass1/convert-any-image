@@ -25,3 +25,18 @@
 - [ ] Confirm the Cloudflare Worker deployment scope and CORS origin.
 - [ ] Build the local Docker converter and validate representative RAW, PDF and PSD conversion fixtures.
 - [ ] Report verified live endpoints, deployment status and any environment-specific limitation.
+
+## Cloudflare Frontend Migration
+
+- [ ] Inspect the existing Cloudflare Pages and Worker deployment state and select the non-conflicting frontend project name.
+- [ ] Replace Vercel configuration and Vercel CI with Cloudflare Pages build and deployment configuration.
+- [ ] Set the production frontend to use the deployed Cloudflare transcript Worker endpoint.
+- [ ] Create and publish the static frontend to Cloudflare Pages from the production build output.
+- [ ] Update Worker CORS to permit the verified Cloudflare Pages production origin.
+- [ ] Validate the public Pages site and transcript API integration, then update deployment documentation.
+
+## Cloudflare Browser Blocker
+
+- [ ] Resolve the blocked Cloudflare dashboard session and repair or reinstall the Cloudflare Pages GitHub integration for `benhass1/convert-any-image`.
+- [ ] Recreate the Pages project with GitHub source configuration once the Cloudflare Git installation is healthy.
+- [ ] Confirm the automatic production build completes from the `main` branch before enabling the GitHub Actions fallback workflow.
