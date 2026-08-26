@@ -1,0 +1,34 @@
+{
+  "build_command": "pnpm run build",
+  "capabilities": [],
+  "dev_command": "pnpm run dev",
+  "env_vars": {},
+  "experiments": null,
+  "git_remote": {
+    "repo_url": "https://7f0548f6b28a1758d9bf7be630d36cb4.artifacts.cloudflare.net/git/prod/NTQ7uhJoMf4K7JRN9KpcBc.git",
+    "expiration": "2026-08-27T07:19:44.114Z",
+    "token": "art_v2_x_83d89927fedabdfafc19872aab65bf333cf96559?expires=1787815184",
+    "backend": "GIT_BACKEND_ARTIFACTS"
+  },
+  "name": "convert-any-image",
+  "path": "/home/ubuntu/convert-any-image",
+  "port": 3000,
+  "secrets": {
+    "BUILT_IN_FORGE_API_KEY": "KjcEVcSd6rUnaVg6qgihEH",
+    "BUILT_IN_FORGE_API_URL": "https://forge.manus.ai",
+    "JWT_SECRET": "6GmqtATBhH9ZGpeH56Xpv7",
+    "OAUTH_SERVER_URL": "https://api.manus.im",
+    "OWNER_NAME": "Ben Has",
+    "OWNER_OPEN_ID": "WGqRQUt7UjnXc6L2F7ykeL",
+    "VITE_ANALYTICS_ENDPOINT": "https://manus-analytics.com",
+    "VITE_ANALYTICS_WEBSITE_ID": "103452e1-858d-48e4-b626-173bec3f5d0b",
+    "VITE_APP_ID": "NTQ7uhJoMf4K7JRN9KpcBc",
+    "VITE_APP_LOGO": "",
+    "VITE_APP_TITLE": "Convert Any Image",
+    "VITE_FRONTEND_FORGE_API_KEY": "kw5KHnVVLg3rpSer9D3JEV",
+    "VITE_FRONTEND_FORGE_API_URL": "https://forge.manus.ai",
+    "VITE_OAUTH_PORTAL_URL": "https://manus.im"
+  },
+  "template_id": "web-static",
+  "test_command": "pnpm test"
+}

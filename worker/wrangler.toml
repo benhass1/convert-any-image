@@ -1,0 +1,9 @@
+name = "convert-any-image-transcript"
+main = "src/index.ts"
+compatibility_date = "2026-08-26"
+workers_dev = true
+
+[vars]
+# Replace with the production Vercel custom domain before deployment.
+ALLOWED_ORIGIN = "https://convertanyimage.com"
+CACHE_TTL_SECONDS = "86400"

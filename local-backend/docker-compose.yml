@@ -1,0 +1,13 @@
+services:
+  converter:
+    build: .
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    read_only: true
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,size=1g
+    security_opt:
+      - no-new-privileges:true
+    restart: unless-stopped
