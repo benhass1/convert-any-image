@@ -86,6 +86,16 @@ function imageFromBlob(blob: Blob) {
 function blobFromCanvas(canvas: HTMLCanvasElement, type: string, quality = .92) {
   return new Promise<Blob>((resolve, reject) => canvas.toBlob((blob) => blob ? resolve(blob) : reject(new Error("This browser cannot encode the selected output format.")), type, quality));
 }
+async function pdfFromCanvas(source: HTMLCanvasElement) {
+  const { jsPDF } = await import("jspdf");
+  const width = Math.max(1, source.width); const height = Math.max(1, source.height);
+  const page = new jsPDF({ orientation: width > height ? "landscape" : "portrait", unit: "px", format: [width, height], compress: true, hotfixes: ["px_scaling"] });
+  const flattened = document.createElement("canvas"); flattened.width = width; flattened.height = height;
+  const context = flattened.getContext("2d"); if (!context) throw new Error("Canvas is unavailable.");
+  context.fillStyle = "#ffffff"; context.fillRect(0, 0, width, height); context.drawImage(source, 0, 0, width, height);
+  page.addImage(flattened.toDataURL("image/jpeg", .92), "JPEG", 0, 0, page.internal.pageSize.getWidth(), page.internal.pageSize.getHeight(), undefined, "FAST");
+  return page.output("blob");
+}
 async function canvasFromTiff(file: File) {
   const buffer = await file.arrayBuffer(); const ifds = UTIF.decode(buffer); if (!ifds.length) throw new Error("The TIFF file could not be read.");
   UTIF.decodeImage(buffer, ifds[0]); const rgba = UTIF.toRGBA8(ifds[0]);
@@ -113,9 +123,9 @@ export async function convertImage(file: File, output: OutputFormat, onPhase?: (
     onPhase?.("decoding"); const result = await heic2any({ blob: file, toType: target.mime as "image/jpeg", quality: .92 });
     return [Array.isArray(result) ? result[0] : result];
   }
-  if (browserReadyExtensions.has(extension) && ["jpg", "png", "webp", "avif"].includes(output)) {
+  if (browserReadyExtensions.has(extension) && (["jpg", "png", "webp", "avif"].includes(output) || output === "pdf")) {
     onPhase?.("decoding"); const canvas = extension === "tif" || extension === "tiff" ? await canvasFromTiff(file) : await canvasFromStandardImage(file);
-    onPhase?.("converting"); return [await blobFromCanvas(canvas, target.mime)];
+    onPhase?.("converting"); return [output === "pdf" ? await pdfFromCanvas(canvas) : await blobFromCanvas(canvas, target.mime)];
   }
   onPhase?.("loading-engine");
   try { onPhase?.("decoding"); const results = await convertWithMagick(file, output); onPhase?.("converting"); return results; }

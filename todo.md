@@ -6,6 +6,7 @@
 - [x] Translate all interface, navigation, status messages, legal pages, and blog content into English.
 - [ ] Update SEO metadata, sitemap, and robots content for the English site.
 - [ ] Test conversion and compression flows, review responsive pages, and confirm the production build.
+- [x] Fix the standard PNG-to-PDF browser conversion route so it uses the native canvas decoder and client-side PDF encoder instead of the unstable WASM decoder.
 
 ## Hybrid Deployment Monorepo
 
