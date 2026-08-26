@@ -57,3 +57,4 @@
 - [x] Update and verify Worker CORS for the custom domain after HTTPS issuance.
 - [x] Validate root-domain, `www` and Pages fallback behavior after DNS propagation. All three hostnames return HTTP 200 and both Pages custom domains are active.
 - [ ] Create the scoped Cloudflare API token, save `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` in GitHub Actions secrets, test both workflows, and then revoke the exposed Global API Key.
+- [x] Remove the duplicate pnpm-version declaration that blocked the GitHub Actions frontend deployment before Cloudflare authentication ran.
