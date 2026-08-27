@@ -25,6 +25,7 @@
 - [x] Move the converter and compressor workbenches into the normal top-of-page entry experience and repair the clipped guide layout reported in the supplied screenshot.
 - [x] Condense the Guides-page entry header so the first article cards are visible immediately on page load.
 - [x] Replace generic generated-image captions with concise, article-specific visual titles across the guide hub.
+- [x] Remove the browser focus outline around the converter workbench when blog links open the upload anchor.
 
 ## Hybrid Deployment Monorepo
 
