@@ -45,6 +45,8 @@
 - [x] Make direct visits to the converter and compressor open at their respective upload workbenches with a sticky-header-safe offset.
 - [x] Ensure the compressor direct-entry scroll also matches the production trailing-slash canonical route.
 - [x] Generate and attach distinct editorial cover images for all guide articles that currently use the styled fallback.
+- [ ] Diagnose why mapped guide cover images are not visible on live article pages and correct their placement or availability if needed.
+- [ ] Publish the generated guide covers to production-accessible storage and replace the failing local storage paths.
 
 ## Hybrid Deployment Monorepo
 
