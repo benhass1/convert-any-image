@@ -23,7 +23,7 @@
 - [x] Reduce first-load work for modern Safari and Firefox, serve generated article covers from public image URLs, and provide graceful visual fallbacks and upload-area landing behavior.
 - [x] Add the supplied Google Search Console verification meta tag to the homepage head and confirm it on the live domain.
 - [x] Move the converter and compressor workbenches into the normal top-of-page entry experience and repair the clipped guide layout reported in the supplied screenshot.
-- [ ] Condense the Guides-page entry header so the first article cards are visible immediately on page load.
+- [x] Condense the Guides-page entry header so the first article cards are visible immediately on page load.
 
 ## Hybrid Deployment Monorepo
 
