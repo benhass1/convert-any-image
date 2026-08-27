@@ -27,6 +27,7 @@
 - [x] Replace generic generated-image captions with concise, article-specific visual titles across the guide hub.
 - [x] Remove the browser focus outline around the converter workbench when blog links open the upload anchor.
 - [x] Add a dedicated local EXIF removal page after Compress that creates cleaned image copies and clearly explains supported formats and limits.
+- [x] Add a truthful EXIF metadata preview, keyword-focused removal-page copy, and related privacy guides without making unverified claims about file limits or universal metadata removal.
 
 ## Hybrid Deployment Monorepo
 
