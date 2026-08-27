@@ -35,6 +35,7 @@
 - [x] Strengthen Remove EXIF crawler-visible static depth, answer-first guidance, entity markup, same-identity About reference and visible About/contact signals.
 - [x] Add semantic H3 subsections to the crawler-visible Remove EXIF page and verify they are present in the deployed HTML.
 - [x] Add verified SoftwareApplication capabilities and three non-duplicative high-intent conversion guides without hidden text, keyword stuffing or unsupported file-limit claims.
+- [x] Add accurate tool-page structured data, descriptive headings and related-tool navigation without creating unsupported format routes or keyword-stuffed copy.
 
 ## Hybrid Deployment Monorepo
 
