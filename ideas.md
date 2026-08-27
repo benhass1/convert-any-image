@@ -77,3 +77,5 @@ Le symbole est une **lentille carrée ouverte** : un cadre technique incomplet q
 - Les grands titres privilégient une promesse concrète et vérifiable de traitement local plutôt qu’une formulation SEO générique ; la voix reste calme, directe et protectrice.
 - Chaque section de contenu non-outil comporte au moins un artefact Signal Utility : marqueur de format carré, repère numéroté, rail de métadonnées ou séparateur de type machine.
 - Les aplats vert pâle restent limités aux zones de traitement actives et aux preuves explicites de confidentialité locale ; ailleurs, le vert signal est un accent de commande, de statut ou de résultat.
+- Sur les pages d’inspection, les grands titres restent couleur encre ; le vert signal qualifie les statuts, repères de phase, données locales et actions plutôt qu’une emphase décorative.
+- Les zones d’aide d’un outil reprennent la structure du poste de commande grâce à un rail de notes, des identifiants de phase, des carrés de format et des séparateurs de type machine.

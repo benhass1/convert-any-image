@@ -50,6 +50,7 @@
 - [x] Add an isolated EXIF report page that reads available local metadata from an uploaded image and links to the existing EXIF-removal tool.
 - [x] Add the new View EXIF report page to the shared desktop and mobile top navigation.
 - [x] Make guide cards fully clickable and strengthen every guide with 2–3 natural topical links while verifying populated BlogPosting keywords.
+- [x] Add concise, accurate EXIF guidance, visible FAQs, structured data and utility links to the EXIF report page without unsupported privacy or performance guarantees.
 
 ## Hybrid Deployment Monorepo
 
