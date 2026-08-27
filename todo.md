@@ -30,6 +30,7 @@
 - [x] Add a truthful EXIF metadata preview, keyword-focused removal-page copy, and related privacy guides without making unverified claims about file limits or universal metadata removal.
 - [x] Resolve the reported SEO and AI-crawler readiness gaps: missing alt text, static readable content and metadata, entity/author/date/Open Graph signals, source citations, and optional llms.txt guidance.
 - [x] Verify and strengthen the homepage static content, citations and author/date schema before requesting a fresh audit crawl.
+- [x] Apply the same static readable content, citations, author/date schema and social metadata treatment to Compress, Remove EXIF and Guides.
 
 ## Hybrid Deployment Monorepo
 
