@@ -39,6 +39,8 @@
 - [x] Review the newly requested exact schema and heading wording, preserving only capability-safe copy without file-limit, transparency or lossless-compression guarantees.
 - [x] Compare the repeated requested JSON-LD snippet with the deployed capability-safe SoftwareApplication schema and document any excluded claims.
 - [x] Refine visible homepage format and compression links with accurate destination labels and title attributes, without transparency-creation or lossless-compression promises.
+- [x] Confirm the requested WebP and Discord headings, retaining accurate wording where compression quality depends on the selected settings.
+- [x] Review the requested aggressive SEO patch and strengthen only accurate schema, visible link labels and the existing Discord guide without duplicate content or unsupported file-limit, transparency or lossless claims.
 
 ## Hybrid Deployment Monorepo
 
