@@ -49,6 +49,7 @@
 - [x] Publish the generated guide covers to production-accessible storage and replace the failing local storage paths.
 - [x] Add an isolated EXIF report page that reads available local metadata from an uploaded image and links to the existing EXIF-removal tool.
 - [x] Add the new View EXIF report page to the shared desktop and mobile top navigation.
+- [x] Make guide cards fully clickable and strengthen every guide with 2–3 natural topical links while verifying populated BlogPosting keywords.
 
 ## Hybrid Deployment Monorepo
 

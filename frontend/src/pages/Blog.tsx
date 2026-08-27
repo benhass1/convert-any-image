@@ -55,7 +55,7 @@ function GuideCardVisual({ article }: { article: Article }) {
 
 function GuideCard({ article, index }: { article: Article; index: number }) {
   const dark = index % 3 === 1;
-  return <article className={`group relative overflow-hidden border border-[#132432]/12 ${categoryTone(index)}`}>
+  return <Link href={`/blog/${article.slug}`} aria-label={`Read ${article.title}`} className="group block focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#5c7820]"><article className={`relative overflow-hidden border border-[#132432]/12 ${categoryTone(index)}`}>
     <span className={`absolute right-0 top-0 z-10 grid h-9 w-9 place-items-center border-b border-l text-[.58rem] font-bold ${dark ? "border-[#f4f0e8]/22 bg-[#132432]/85 text-[#b7f840]" : "border-[#132432]/15 bg-[#f7f4ee]/85 text-[#5c7820]"}`}>{`${index + 1}`.padStart(2, "0")}</span>
     <GuideCardVisual article={article}/>
     <div className="p-6">
@@ -64,10 +64,10 @@ function GuideCard({ article, index }: { article: Article; index: number }) {
       <p className={`mt-4 text-sm leading-6 ${dark ? "text-[#d8d2c5]/75" : "text-[#52616a]"}`}>{article.lead}</p>
       <div className="mt-8 flex items-center justify-between border-t border-current/10 pt-4">
         <span className={`flex items-center gap-2 text-xs font-bold ${dark ? "text-[#d8d2c5]/65" : "text-[#65727b]"}`}><Clock3 className="h-3.5 w-3.5"/>{article.reading}</span>
-        <Link href={`/blog/${article.slug}`} className={`grid h-9 w-9 place-items-center border transition-transform group-hover:translate-x-1 ${dark ? "border-[#f4f0e8]/30 text-[#b7f840]" : "border-[#132432]/15 text-[#132432]"}`} aria-label={`Read ${article.title}`}><ArrowUpRight className="h-4 w-4"/></Link>
+        <span aria-hidden="true" className={`grid h-9 w-9 place-items-center border transition-transform group-hover:translate-x-1 ${dark ? "border-[#f4f0e8]/30 text-[#b7f840]" : "border-[#132432]/15 text-[#132432]"}`}><ArrowUpRight className="h-4 w-4"/></span>
       </div>
     </div>
-  </article>;
+  </article></Link>;
 }
 
 export function BlogIndex() {
