@@ -23,10 +23,11 @@ a { transition:color 180ms ease, background-color 180ms ease; }
 .signal-range::-webkit-slider-thumb { height:18px; width:18px; appearance:none; border:3px solid #132432; border-radius:50%; background:#b7f840; box-shadow:0 0 0 1px rgba(244,240,232,.55); }
 .signal-range::-moz-range-thumb { height:14px; width:14px; border:3px solid #132432; border-radius:50%; background:#b7f840; }
 /* Signal Utility tool-first entry: the upload workbench leads; explanatory context follows without removing it. */
-main:has(> #converter-upload), main:has(> #compress-upload), main:has(> #exif-upload) { display:flex; flex-direction:column; }
-main:has(> #converter-upload) > #converter-upload, main:has(> #compress-upload) > #compress-upload, main:has(> #exif-upload) > #exif-upload { order:1; }
-main:has(> #converter-upload) > section:nth-child(2), main:has(> #compress-upload) > section:nth-child(2), main:has(> #exif-upload) > section:nth-child(2) { order:2; }
-main:has(> #converter-upload) > section:nth-child(n + 3), main:has(> #compress-upload) > section:nth-child(n + 3), main:has(> #exif-upload) > section:nth-child(n + 3) { order:3; }
+main:has(> #converter-upload), main:has(> #compress-upload), main:has(> #exif-upload), main:has(> #view-exif-upload) { display:flex; flex-direction:column; }
+main:has(> #converter-upload) > section, main:has(> #compress-upload) > section, main:has(> #exif-upload) > section, main:has(> #view-exif-upload) > section { order:3; }
+main:has(> #converter-upload) > section:first-child, main:has(> #compress-upload) > section:first-child, main:has(> #exif-upload) > section:first-child, main:has(> #view-exif-upload) > section:first-child { order:2; }
+main:has(> #converter-upload) > #converter-upload, main:has(> #compress-upload) > #compress-upload, main:has(> #exif-upload) > #exif-upload, main:has(> #view-exif-upload) > #view-exif-upload { order:1; }
+@media (max-width:1279px) { #compress-upload > div > aside { order:2; } #compress-upload > div > aside + div { order:1; } }
 article figure > img { display:block; }
 #converter-upload:focus { outline:none; }
 @media (prefers-reduced-motion:no-preference) { main > section:first-child img { animation: drift 18s ease-in-out infinite alternate; } @keyframes drift { from { transform:scale(1.02) translateX(0); } to { transform:scale(1.07) translateX(-1.25%); } } }

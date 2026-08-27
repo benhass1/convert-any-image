@@ -1,9 +1,11 @@
 /* Signal Utility design reminder: tool-first local utility, navy workbench, lime safety cues and honest technical boundaries. */
+/** Signal Utility design reminder: the local EXIF removal console opens directly at its file intake on every device. */
 import { useRef, useState } from "react";
 import { Download, FileImage, ImageOff, LockKeyhole, MapPinOff, Plus, RefreshCcw, ShieldCheck, X } from "lucide-react";
 import SiteShell from "../components/SiteShell";
 import Seo from "../components/Seo";
 import RelatedTools from "../components/RelatedTools";
+import { useDefaultWorkbench } from "../hooks/useDefaultWorkbench";
 import { downloadBlob, ExifOutputFormat, extensionOf, prettySize, removeExifFromImage } from "../lib/image-processing";
 
 type CleanStatus = "ready" | "cleaning" | "done" | "error";
@@ -26,6 +28,7 @@ function cleanedName(file: File, output: ExifOutputFormat) { return `${file.name
 function coordinateLabel(latitude?: number, longitude?: number) { if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) return undefined; const lat = Math.abs(latitude!).toFixed(4); const lon = Math.abs(longitude!).toFixed(4); return `${lat}° ${latitude! >= 0 ? "N" : "S"}, ${lon}° ${longitude! >= 0 ? "E" : "W"}`; }
 
 export default function RemoveExif() {
+  useDefaultWorkbench("exif-upload");
   const input = useRef<HTMLInputElement>(null);
   const [items, setItems] = useState<CleanItem[]>([]);
   const [output, setOutput] = useState<ExifOutputFormat>("jpg");

@@ -5,6 +5,7 @@ import { ArrowDownToLine, Check, ChevronDown, ImageDown, LoaderCircle, LockKeyho
 import SiteShell from "@/components/SiteShell";
 import Seo from "@/components/Seo";
 import RelatedTools from "@/components/RelatedTools";
+import { useDefaultWorkbench } from "@/hooks/useDefaultWorkbench";
 import { convertImage, downloadBlob, extensionOf, prettySize } from "@/lib/image-processing";
 
 type Preset = "smaller" | "balanced" | "preserve";
@@ -47,6 +48,7 @@ const useCases = [
 function outputExtension(result: Blob) { if (result.type === "image/png") return "png"; if (result.type === "image/jpeg") return "jpg"; return "webp"; }
 
 export default function Compress() {
+  useDefaultWorkbench("compress-upload");
   const input = useRef<HTMLInputElement>(null);
   const [items, setItems] = useState<Item[]>([]);
   const [quality, setQuality] = useState(82);

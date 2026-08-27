@@ -51,6 +51,7 @@
 - [x] Add the new View EXIF report page to the shared desktop and mobile top navigation.
 - [x] Make guide cards fully clickable and strengthen every guide with 2–3 natural topical links while verifying populated BlogPosting keywords.
 - [x] Add concise, accurate EXIF guidance, visible FAQs, structured data and utility links to the EXIF report page without unsupported privacy or performance guarantees.
+- [x] Make direct mobile visits to Convert, Compress, Remove EXIF and View EXIF open at their upload workbenches below the sticky header.
 
 ## Hybrid Deployment Monorepo
 

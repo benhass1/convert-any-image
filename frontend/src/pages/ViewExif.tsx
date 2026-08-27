@@ -3,6 +3,7 @@ import { useRef, useState } from "react";
 import { FileSearch, FileType2, Info, LoaderCircle, MapPin, ScanSearch, ShieldCheck } from "lucide-react";
 import SiteShell from "@/components/SiteShell";
 import Seo from "@/components/Seo";
+import { useDefaultWorkbench } from "@/hooks/useDefaultWorkbench";
 import { prettySize } from "@/lib/image-processing";
 
 type ReadState = "idle" | "reading" | "ready" | "empty" | "error";
@@ -61,6 +62,7 @@ function presentValue(value: unknown): string {
 }
 
 export default function ViewExif() {
+  useDefaultWorkbench("view-exif-upload");
   const input = useRef<HTMLInputElement>(null);
   const [file, setFile] = useState<File>();
   const [entries, setEntries] = useState<ExifEntry[]>([]);
@@ -95,7 +97,7 @@ export default function ViewExif() {
   };
 
   return <SiteShell><Seo exactTitle title="View EXIF Data from an Image – Local Browser Report" description="Inspect EXIF fields that your browser can read from an image file, then open the local EXIF remover to prepare a new copy." keywords="view exif data, local browser-based metadata viewer, privacy-safe image inspection, check photo metadata without uploading" jsonLd={reportSchema}/><main>
-    <section className="border-b border-[#132432]/10 bg-[#f4f0e8] px-5 py-5 lg:px-10 lg:py-8">
+    <section id="view-exif-upload" className="scroll-mt-24 border-b border-[#132432]/10 bg-[#f4f0e8] px-5 py-5 lg:px-10 lg:py-8">
       <div className="mx-auto grid max-w-[1360px] border border-[#132432]/12 bg-[#fffdf8] lg:grid-cols-[minmax(0,1fr)_320px]">
         <div className="min-w-0 p-5 sm:p-8"><p className="label">01 / EXIF REPORT</p><h1 className="font-display mt-2 max-w-3xl text-3xl font-bold leading-[.96] tracking-[-.06em] sm:text-4xl">View image EXIF data on your device</h1><p className="mt-4 max-w-2xl text-sm leading-6 text-[#52616a]">Choose an image file to list the EXIF fields that are available to this browser. The report stays local and does not modify your original.</p>
           <div className="mt-7 border border-dashed border-[#132432]/20 bg-[linear-gradient(90deg,rgba(19,36,50,.055)_1px,transparent_1px),linear-gradient(rgba(19,36,50,.055)_1px,transparent_1px)] bg-[size:20px_20px] p-7"><div className="flex flex-col items-start gap-5 sm:flex-row sm:items-center sm:justify-between"><div className="flex items-center gap-4"><span className="grid h-12 w-12 shrink-0 place-items-center rounded-full bg-[#132432] text-[#b7f840]"><ScanSearch className="h-5 w-5"/></span><div><p className="label text-[#5c7820]">READY / LOCAL READ</p><h2 className="font-display mt-2 text-xl font-bold tracking-[-.04em]">Choose an image to inspect</h2><p className="mt-1 text-sm text-[#52616a]">Common formats work best; readable metadata depends on the file and browser.</p></div></div><button type="button" onClick={() => input.current?.click()} className="inline-flex shrink-0 items-center gap-2 border border-[#132432] bg-[#fffdf8] px-4 py-3 text-sm font-bold transition-colors hover:bg-[#132432] hover:text-[#f4f0e8]"><FileSearch className="h-4 w-4"/>Select image</button><input ref={input} type="file" accept="image/*,.heic,.heif,.tif,.tiff" className="hidden" onChange={(event) => { void inspect(event.target.files?.[0]); event.target.value = ""; }}/></div></div>
