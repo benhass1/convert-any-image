@@ -22,6 +22,7 @@
 - [x] Reset scroll to the top for every guide-route transition while retaining sticky-header-safe upload targets for converter and compressor links.
 - [x] Reduce first-load work for modern Safari and Firefox, serve generated article covers from public image URLs, and provide graceful visual fallbacks and upload-area landing behavior.
 - [x] Add the supplied Google Search Console verification meta tag to the homepage head and confirm it on the live domain.
+- [ ] Move the converter and compressor workbenches into the normal top-of-page entry experience and repair the clipped guide layout reported in the supplied screenshot.
 
 ## Hybrid Deployment Monorepo
 
