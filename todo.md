@@ -32,6 +32,7 @@
 - [x] Verify and strengthen the homepage static content, citations and author/date schema before requesting a fresh audit crawl.
 - [x] Apply the same static readable content, citations, author/date schema and social metadata treatment to Compress, Remove EXIF and Guides.
 - [x] Increase Compress crawler-visible static content depth and verify the non-JavaScript response is substantive for AI and search crawlers.
+- [x] Strengthen Remove EXIF crawler-visible static depth, answer-first guidance, entity markup and visible About/contact signals without inventing unrelated external identity profiles.
 
 ## Hybrid Deployment Monorepo
 

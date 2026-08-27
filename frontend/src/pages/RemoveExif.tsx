@@ -14,6 +14,8 @@ const outputMimeLabel: Record<ExifOutputFormat, string> = { jpg: "JPG", png: "PN
 const exifSchema = {
   "@context": "https://schema.org",
   "@graph": [
+    { "@type": "Organization", "@id": "https://convertanyimage.com/#organization", name: "Convert Any Image", url: "https://convertanyimage.com/", logo: "https://convertanyimage.com/favicon.svg", sameAs: ["https://convertanyimage.com/about"] },
+    { "@type": "WebSite", "@id": "https://convertanyimage.com/#website", name: "Convert Any Image", url: "https://convertanyimage.com/", publisher: { "@id": "https://convertanyimage.com/#organization" }, inLanguage: "en" },
     { "@type": "SoftwareApplication", "@id": "https://convertanyimage.com/remove-exif#app", name: "Convert Any Image EXIF Remover", applicationCategory: "MultimediaApplication", operatingSystem: "Web browser", url: "https://convertanyimage.com/remove-exif", author: { "@type": "Organization", "@id": "https://convertanyimage.com/#organization", name: "Convert Any Image Editorial Team" }, publisher: { "@type": "Organization", "@id": "https://convertanyimage.com/#organization", name: "Convert Any Image" }, datePublished: "2026-08-27T00:00:00+02:00", dateModified: "2026-08-27T00:00:00+02:00" },
     { "@type": "WebPage", "@id": "https://convertanyimage.com/remove-exif#webpage", url: "https://convertanyimage.com/remove-exif", name: "Remove EXIF Data from Images – Private & Local", author: { "@id": "https://convertanyimage.com/#organization" }, publisher: { "@id": "https://convertanyimage.com/#organization" }, datePublished: "2026-08-27T00:00:00+02:00", dateModified: "2026-08-27T00:00:00+02:00", citation: ["https://www.cipa.jp/e/std/std-sec.html", "https://www.loc.gov/preservation/digital/formats/fdd/fdd000618.shtml"] },
   ],
