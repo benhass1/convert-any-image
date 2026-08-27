@@ -30,7 +30,7 @@ const guideIndexSchema = {
 
 function ToolCta({ compact = false, tool = "convert" }: { compact?: boolean; tool?: Article["tool"] }) {
   const href = tool === "compress" ? "/compress" : tool === "exif" ? "/remove-exif" : "/webp-to-png";
-  const label = tool === "compress" ? "Open the free image compressor" : tool === "exif" ? "Open the local EXIF remover" : "Open the free image converter";
+  const label = tool === "compress" ? "compress PNG for Discord without losing quality" : tool === "exif" ? "remove EXIF data from photos free" : "convert WebP to PNG for Shopify transparent backgrounds";
   return <aside className={`border ${compact ? "my-9 p-5" : "mt-12 p-7"} border-[#132432]/15 bg-[#e8f4cc]`}>
     <div className="flex gap-3">
       <ShieldCheck className="mt-1 h-5 w-5 shrink-0 text-[#5c7820]"/>
