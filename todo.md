@@ -42,6 +42,7 @@
 - [x] Confirm the requested WebP and Discord headings, retaining accurate wording where compression quality depends on the selected settings.
 - [x] Review the requested aggressive SEO patch and strengthen only accurate schema, visible link labels and the existing Discord guide without duplicate content or unsupported file-limit, transparency or lossless claims.
 - [x] Review the attached homepage SEO-copy request and implement only concise, visible, capability-safe wording and navigation improvements.
+- [x] Make direct visits to the converter and compressor open at their respective upload workbenches with a sticky-header-safe offset.
 
 ## Hybrid Deployment Monorepo
 
