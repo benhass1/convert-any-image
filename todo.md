@@ -37,6 +37,8 @@
 - [x] Add verified SoftwareApplication capabilities and three non-duplicative high-intent conversion guides without hidden text, keyword stuffing or unsupported file-limit claims.
 - [x] Add accurate tool-page structured data, descriptive headings and related-tool navigation without creating unsupported format routes or keyword-stuffed copy.
 - [x] Review the newly requested exact schema and heading wording, preserving only capability-safe copy without file-limit, transparency or lossless-compression guarantees.
+- [x] Compare the repeated requested JSON-LD snippet with the deployed capability-safe SoftwareApplication schema and document any excluded claims.
+- [x] Refine visible homepage format and compression links with accurate destination labels and title attributes, without transparency-creation or lossless-compression promises.
 
 ## Hybrid Deployment Monorepo
 
