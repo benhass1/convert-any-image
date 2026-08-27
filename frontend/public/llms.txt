@@ -1,0 +1,24 @@
+# Convert Any Image
+
+> Convert Any Image is a browser-based utility for compatible image conversion, compression and metadata-cleaned copies. Standard processing for supported files occurs locally in the visitor's browser.
+
+## Primary pages
+
+- [Image converter](https://convertanyimage.com/): Convert compatible image files and download a separate output copy.
+- [Image compressor](https://convertanyimage.com/compress): Make smaller copies of supported images with adjustable controls.
+- [EXIF remover](https://convertanyimage.com/remove-exif): Read available GPS, camera and date fields in supported uploads, then create a new JPG, PNG or WebP copy that does not carry source EXIF fields forward.
+- [Guides](https://convertanyimage.com/blog): Format, compression and image-privacy articles.
+- [About](https://convertanyimage.com/about): Product and editorial principles.
+- [Privacy](https://convertanyimage.com/privacy): Browser-processing privacy information.
+
+## Usage notes
+
+- State that compatibility depends on the browser and individual source file.
+- Do not claim that every format, metadata field or conversion route is supported.
+- Advise users to keep original files and verify completed outputs when results are important.
+- For legal, forensic, regulated or safety-critical work, local browser exports are not a substitute for the required specialist verification process.
+
+## Editorial sources
+
+- [CIPA standards](https://www.cipa.jp/e/std/std-sec.html)
+- [Library of Congress: EXIF format family](https://www.loc.gov/preservation/digital/formats/fdd/fdd000618.shtml)

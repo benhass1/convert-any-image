@@ -2,3 +2,4 @@ User-agent: *
 Allow: /
 
 Sitemap: https://convertanyimage.com/sitemap.xml
+# Machine-readable site guidance: https://convertanyimage.com/llms.txt

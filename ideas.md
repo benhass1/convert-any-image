@@ -74,3 +74,6 @@ Le symbole est une **lentille carrée ouverte** : un cadre technique incomplet q
 - Le **vert signal `#B7F840`** est réservé aux contrôles actifs, preuves de traitement local, résultats terminés, chiffres clés et repères de format carrés ; il n’est jamais employé comme aplat décoratif de grand titre.
 - Toute page non-outil conserve la structure en L de Signal Utility grâce à un rail de métadonnées visible, des labels de statut ou des marqueurs de cadrage carrés.
 - Les articles et cartes éditoriales se lisent comme des notes de laboratoire : Space Grotesk pour la signalétique et les titres, Source Serif 4 exclusivement pour les passages explicatifs continus.
+- Les grands titres privilégient une promesse concrète et vérifiable de traitement local plutôt qu’une formulation SEO générique ; la voix reste calme, directe et protectrice.
+- Chaque section de contenu non-outil comporte au moins un artefact Signal Utility : marqueur de format carré, repère numéroté, rail de métadonnées ou séparateur de type machine.
+- Les aplats vert pâle restent limités aux zones de traitement actives et aux preuves explicites de confidentialité locale ; ailleurs, le vert signal est un accent de commande, de statut ou de résultat.

@@ -28,6 +28,7 @@
 - [x] Remove the browser focus outline around the converter workbench when blog links open the upload anchor.
 - [x] Add a dedicated local EXIF removal page after Compress that creates cleaned image copies and clearly explains supported formats and limits.
 - [x] Add a truthful EXIF metadata preview, keyword-focused removal-page copy, and related privacy guides without making unverified claims about file limits or universal metadata removal.
+- [x] Resolve the reported SEO and AI-crawler readiness gaps: missing alt text, static readable content and metadata, entity/author/date/Open Graph signals, source citations, and optional llms.txt guidance.
 
 ## Hybrid Deployment Monorepo
 
