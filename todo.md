@@ -41,6 +41,12 @@
 - [x] Refine visible homepage format and compression links with accurate destination labels and title attributes, without transparency-creation or lossless-compression promises.
 - [x] Confirm the requested WebP and Discord headings, retaining accurate wording where compression quality depends on the selected settings.
 - [x] Review the requested aggressive SEO patch and strengthen only accurate schema, visible link labels and the existing Discord guide without duplicate content or unsupported file-limit, transparency or lossless claims.
+- [x] Review the attached homepage SEO-copy request and implement only concise, visible, capability-safe wording and navigation improvements.
+- [x] Make direct visits to the converter and compressor open at their respective upload workbenches with a sticky-header-safe offset.
+- [x] Ensure the compressor direct-entry scroll also matches the production trailing-slash canonical route.
+- [x] Generate and attach distinct editorial cover images for all guide articles that currently use the styled fallback.
+- [x] Diagnose why mapped guide cover images are not visible on live article pages and correct their placement or availability if needed.
+- [x] Publish the generated guide covers to production-accessible storage and replace the failing local storage paths.
 
 ## Hybrid Deployment Monorepo
 
