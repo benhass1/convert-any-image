@@ -170,3 +170,27 @@ export async function convertImage(file: File, output: OutputFormat, onPhase?: (
 }
 
 export function downloadBlob(blob: Blob, fileName: string) { const url = URL.createObjectURL(blob); const link = document.createElement("a"); link.href = url; link.download = fileName; link.click(); URL.revokeObjectURL(url); }
+
+export type ExifOutputFormat = "jpg" | "png" | "webp";
+
+/**
+ * Re-renders supported pixel data to a new browser-created file. The canvas
+ * encoder does not copy source EXIF blocks into the resulting image.
+ */
+export async function removeExifFromImage(file: File, output: ExifOutputFormat, quality = .92) {
+  const extension = extensionOf(file.name);
+  if (!["jpg", "jpeg", "png", "webp", "avif", "heic", "heif"].includes(extension)) throw new Error("Choose a JPG, PNG, WebP, AVIF or HEIC image for this local metadata-cleaning tool.");
+  let source: Blob = file;
+  if (extension === "heic" || extension === "heif") {
+    const { default: heic2any } = await import("heic2any");
+    const decoded = await heic2any({ blob: file, toType: "image/jpeg", quality });
+    source = Array.isArray(decoded) ? decoded[0] : decoded;
+  }
+  const image = await imageFromBlob(source);
+  const canvas = document.createElement("canvas");
+  canvas.width = image.naturalWidth || image.width; canvas.height = image.naturalHeight || image.height;
+  const context = canvas.getContext("2d"); if (!context) throw new Error("Canvas is unavailable in this browser.");
+  context.drawImage(image, 0, 0, canvas.width, canvas.height);
+  const type = output === "png" ? "image/png" : output === "webp" ? "image/webp" : "image/jpeg";
+  return blobFromCanvas(canvas, type, quality);
+}

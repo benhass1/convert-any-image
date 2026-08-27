@@ -1,0 +1,54 @@
+/* Signal Utility design reminder: tool-first local utility, navy workbench, lime safety cues and honest technical boundaries. */
+import { useRef, useState } from "react";
+import { Download, FileImage, ImageOff, LockKeyhole, Plus, RefreshCcw, ShieldCheck, X } from "lucide-react";
+import SiteShell from "../components/SiteShell";
+import Seo from "../components/Seo";
+import { downloadBlob, ExifOutputFormat, extensionOf, prettySize, removeExifFromImage } from "../lib/image-processing";
+
+type CleanStatus = "ready" | "cleaning" | "done" | "error";
+type CleanItem = { id: string; file: File; status: CleanStatus; clean?: Blob; error?: string };
+const supported = new Set(["jpg", "jpeg", "png", "webp", "avif", "heic", "heif"]);
+const makeId = () => globalThis.crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+const outputMimeLabel: Record<ExifOutputFormat, string> = { jpg: "JPG", png: "PNG", webp: "WebP" };
+
+function cleanedName(file: File, output: ExifOutputFormat) { return `${file.name.replace(/\.[^/.]+$/, "")}-exif-removed.${output}`; }
+
+export default function RemoveExif() {
+  const input = useRef<HTMLInputElement>(null);
+  const [items, setItems] = useState<CleanItem[]>([]);
+  const [output, setOutput] = useState<ExifOutputFormat>("jpg");
+  const [quality, setQuality] = useState(92);
+  const [dragging, setDragging] = useState(false);
+  const addFiles = (files: FileList | File[]) => {
+    const selected = Array.from(files).map((file): CleanItem => supported.has(extensionOf(file.name)) ? { id: makeId(), file, status: "ready" } : { id: makeId(), file, status: "error", error: "Use JPG, PNG, WebP, AVIF or HEIC." });
+    if (selected.length) setItems((current) => [...current, ...selected]);
+  };
+  const cleanAll = async () => {
+    const selected = items.filter((item) => item.status === "ready" || item.status === "error");
+    for (const item of selected) {
+      if (!supported.has(extensionOf(item.file.name))) continue;
+      setItems((current) => current.map((entry) => entry.id === item.id ? { ...entry, status: "cleaning", error: undefined } : entry));
+      try {
+        const clean = await removeExifFromImage(item.file, output, quality / 100);
+        setItems((current) => current.map((entry) => entry.id === item.id ? { ...entry, status: "done", clean } : entry));
+      } catch (error) {
+        setItems((current) => current.map((entry) => entry.id === item.id ? { ...entry, status: "error", error: error instanceof Error ? error.message : "This file could not be cleaned in this browser." } : entry));
+      }
+    }
+  };
+  const done = items.filter((item) => item.status === "done" && item.clean).length;
+  return <SiteShell><Seo exactTitle title="Remove EXIF Data from Images – Local Browser Tool" description="Create a fresh JPG, PNG or WebP copy without carrying source EXIF fields. Image processing happens locally in your browser for supported files." keywords="remove exif data, exif remover, remove image metadata, delete photo location data, local exif removal"/><main>
+    <section id="exif-upload" className="scroll-mt-24 border-b border-[#132432]/10 bg-[#f4f0e8] px-5 py-5 lg:px-10 lg:py-8">
+      <div className="mx-auto grid max-w-[1360px] gap-0 border border-[#132432]/12 bg-[#fffdf8] lg:grid-cols-[minmax(0,1fr)_320px]">
+        <div className="min-w-0 p-5 sm:p-8"><div className="flex flex-wrap items-center justify-between gap-3"><div><p className="label">01 / REMOVE EXIF</p><h1 className="font-display mt-2 text-3xl font-bold tracking-[-.06em] sm:text-4xl">Clean Image Metadata Locally</h1></div><span className="rounded-full bg-[#132432] px-3 py-2 text-[.65rem] font-bold tracking-[.12em] text-[#f4f0e8]">{done.toString().padStart(2, "0")} CLEAN</span></div>
+          <div onDragOver={(event) => { event.preventDefault(); setDragging(true); }} onDragLeave={() => setDragging(false)} onDrop={(event) => { event.preventDefault(); setDragging(false); addFiles(event.dataTransfer.files); }} className={`mt-6 grid min-h-48 place-items-center border border-dashed p-7 text-center transition-colors ${dragging ? "border-[#5c7820] bg-[#e8f4cc]" : "border-[#132432]/20 bg-[linear-gradient(90deg,rgba(19,36,50,.055)_1px,transparent_1px),linear-gradient(rgba(19,36,50,.055)_1px,transparent_1px)] bg-[size:20px_20px]"}`}><div><span className="mx-auto grid h-12 w-12 place-items-center rounded-full bg-[#132432] text-[#b7f840]"><ImageOff className="h-5 w-5"/></span><h2 className="font-display mt-4 text-2xl font-bold tracking-[-.05em]">Drop images to clean</h2><p className="mt-2 text-sm text-[#52616a]">JPG, PNG, WebP, AVIF and HEIC</p><button type="button" onClick={() => input.current?.click()} className="mt-5 inline-flex items-center gap-2 border border-[#132432] px-4 py-2 text-sm font-bold transition-colors hover:bg-[#132432] hover:text-[#f4f0e8]"><Plus className="h-4 w-4"/>Select images</button><input ref={input} type="file" accept="image/jpeg,image/png,image/webp,image/avif,image/heic,image/heif" multiple className="hidden" onChange={(event) => { if (event.target.files) addFiles(event.target.files); event.target.value = ""; }}/></div></div>
+          <div className="mt-4 flex flex-wrap items-center justify-between gap-3"><button type="button" onClick={() => input.current?.click()} className="inline-flex items-center gap-2 text-sm font-medium text-[#41525d] hover:text-[#132432]"><Plus className="h-4 w-4"/>Add images</button><button type="button" disabled={!items.some((item) => item.status === "ready" || item.status === "error")} onClick={cleanAll} className="inline-flex items-center gap-2 bg-[#132432] px-4 py-3 text-sm font-bold text-[#f4f0e8] transition-colors hover:bg-[#41525d] disabled:cursor-not-allowed disabled:opacity-45"><ShieldCheck className="h-4 w-4"/>Remove EXIF data</button></div>
+          {items.length > 0 && <div className="mt-6 divide-y divide-[#132432]/10 border-y border-[#132432]/10">{items.map((item) => <div key={item.id} className="flex flex-wrap items-center gap-3 py-3"><span className="grid h-9 w-9 place-items-center bg-[#132432] text-[#b7f840]"><FileImage className="h-4 w-4"/></span><div className="min-w-40 flex-1"><p className="truncate text-sm font-bold">{item.file.name}</p><p className="mt-0.5 text-xs text-[#65727b]">{prettySize(item.file.size)} · {item.status === "cleaning" ? "Cleaning metadata…" : item.status === "done" ? `${outputMimeLabel[output]} copy ready` : item.error ?? "Ready"}</p></div>{item.status === "done" && item.clean ? <button type="button" onClick={() => downloadBlob(item.clean!, cleanedName(item.file, output))} className="inline-flex items-center gap-2 border border-[#132432]/15 px-3 py-2 text-sm font-bold hover:bg-[#e8f4cc]"><Download className="h-4 w-4"/>Download</button> : <button type="button" onClick={() => setItems((current) => current.filter((entry) => entry.id !== item.id))} aria-label={`Remove ${item.file.name}`} className="grid h-9 w-9 place-items-center text-[#65727b] hover:bg-[#132432]/7 hover:text-[#132432]"><X className="h-4 w-4"/></button>}</div>)}</div>}
+        </div>
+        <aside className="bg-[#132432] p-6 text-[#f4f0e8] sm:p-8"><p className="label text-[#b7f840]">02 / COPY SETTINGS</p><h2 className="font-display mt-3 text-2xl font-bold tracking-[-.05em]">New clean image</h2><p className="mt-3 text-sm leading-6 text-[#d8d2c5]/72">The original stays unchanged. The download is a new image created from visible pixels.</p><fieldset className="mt-7"><legend className="label text-[#d8d2c5]/60">OUTPUT FORMAT</legend><div className="mt-3 grid grid-cols-3 gap-2">{(["jpg", "png", "webp"] as ExifOutputFormat[]).map((format) => <button key={format} type="button" onClick={() => setOutput(format)} className={`border px-2 py-3 text-xs font-bold ${output === format ? "border-[#b7f840] bg-[#b7f840] text-[#132432]" : "border-[#f4f0e8]/18 text-[#f4f0e8] hover:border-[#b7f840]"}`}>{outputMimeLabel[format]}</button>)}</div></fieldset><label className="mt-8 block"><span className="label text-[#d8d2c5]/60">IMAGE QUALITY <strong className="float-right text-[#b7f840]">{quality}%</strong></span><input aria-label="Image quality" type="range" min="60" max="100" value={quality} onChange={(event) => setQuality(Number(event.target.value))} className="mt-4 w-full accent-[#b7f840]"/></label><div className="mt-9 border-t border-[#f4f0e8]/15 pt-5"><p className="flex items-center gap-2 text-sm font-bold"><LockKeyhole className="h-4 w-4 text-[#b7f840]"/>Local browser processing</p><p className="mt-3 text-sm leading-6 text-[#d8d2c5]/68">For supported files, your image is decoded and re-exported on this device. Source EXIF fields are not carried into the downloaded JPG, PNG or WebP copy.</p></div></aside>
+      </div>
+    </section>
+    <section className="bg-[#132432] px-5 py-11 text-[#f4f0e8] lg:px-10"><div className="mx-auto grid max-w-[1240px] gap-8 lg:grid-cols-[.85fr_1.15fr] lg:items-end"><p className="label text-[#b7f840]">LOCAL METADATA HYGIENE</p><div><h2 className="font-display text-4xl font-bold leading-[.96] tracking-[-.07em] lg:text-6xl">Share the image,<br/>not the details.</h2><p className="mt-5 max-w-2xl text-base leading-7 text-[#d8d2c5]/72">Photos can contain EXIF information such as camera settings, dates and, in some cases, location data. This tool makes a fresh visual copy rather than modifying your original.</p></div></div></section>
+    <section className="mx-auto max-w-[1240px] px-5 py-12 lg:px-10 lg:py-16"><div className="grid gap-px overflow-hidden border border-[#132432]/12 bg-[#132432]/12 md:grid-cols-3"><div className="bg-[#f4f0e8] p-6"><span className="grid h-10 w-10 place-items-center bg-[#132432] text-[#b7f840]"><RefreshCcw className="h-4 w-4"/></span><h2 className="font-display mt-6 text-2xl font-bold tracking-[-.05em]">Creates a new copy</h2><p className="mt-3 text-sm leading-6 text-[#52616a]">Your source file remains untouched. Download a clearly named new image once processing finishes.</p></div><div className="bg-[#f4f0e8] p-6"><span className="grid h-10 w-10 place-items-center bg-[#132432] text-[#b7f840]"><ShieldCheck className="h-4 w-4"/></span><h2 className="font-display mt-6 text-2xl font-bold tracking-[-.05em]">Does not copy EXIF</h2><p className="mt-3 text-sm leading-6 text-[#52616a]">The supported output is encoded afresh from pixel data, so source EXIF fields are not transferred to the downloaded image.</p></div><div className="bg-[#f4f0e8] p-6"><span className="grid h-10 w-10 place-items-center bg-[#132432] text-[#b7f840]"><LockKeyhole className="h-4 w-4"/></span><h2 className="font-display mt-6 text-2xl font-bold tracking-[-.05em]">Check high-risk files</h2><p className="mt-3 text-sm leading-6 text-[#52616a]">For legal, regulated or forensic use, inspect the completed output with your organisation’s approved metadata-review process.</p></div></div></section>
+  </main></SiteShell>;
+}
