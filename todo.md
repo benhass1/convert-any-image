@@ -48,6 +48,7 @@
 - [x] Diagnose why mapped guide cover images are not visible on live article pages and correct their placement or availability if needed.
 - [x] Publish the generated guide covers to production-accessible storage and replace the failing local storage paths.
 - [x] Add an isolated EXIF report page that reads available local metadata from an uploaded image and links to the existing EXIF-removal tool.
+- [x] Add the new View EXIF report page to the shared desktop and mobile top navigation.
 
 ## Hybrid Deployment Monorepo
 
