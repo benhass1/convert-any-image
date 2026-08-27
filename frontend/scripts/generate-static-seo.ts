@@ -9,7 +9,7 @@ const publishDate = "2026-08-27T00:00:00+02:00";
 const escape = (value: string) => value.replace(/[&<>"']/g, (character) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[character]!);
 const plain = (value: string) => value.replace(/<[^>]*>/g, "");
 const nav = `<nav aria-label="Primary"><a href="/">Convert</a><a href="/compress">Compress</a><a href="/remove-exif">Remove EXIF</a><a href="/blog">Guides</a><a href="/about">About</a></nav>`;
-const publisher = { "@type": "Organization", "@id": `${site}/#organization`, name: "Convert Any Image", url: site, logo: `${site}/favicon.svg`, description: "Browser-based image conversion, compression and metadata-cleaned copy creation for supported image files." };
+const publisher = { "@type": "Organization", "@id": `${site}/#organization`, name: "Convert Any Image", url: site, logo: `${site}/favicon.svg`, sameAs: [`${site}/about`], description: "Browser-based image conversion, compression and metadata-cleaned copy creation for supported image files." };
 const website = { "@type": "WebSite", "@id": `${site}/#website`, url: site, name: "Convert Any Image", publisher: { "@id": `${site}/#organization` }, inLanguage: "en" };
 
 function shell(title: string, description: string, pathname: string, body: string, schema: Record<string, unknown> | Record<string, unknown>[]) {
