@@ -44,6 +44,7 @@
 - [x] Review the attached homepage SEO-copy request and implement only concise, visible, capability-safe wording and navigation improvements.
 - [x] Make direct visits to the converter and compressor open at their respective upload workbenches with a sticky-header-safe offset.
 - [x] Ensure the compressor direct-entry scroll also matches the production trailing-slash canonical route.
+- [x] Generate and attach distinct editorial cover images for all guide articles that currently use the styled fallback.
 
 ## Hybrid Deployment Monorepo
 
