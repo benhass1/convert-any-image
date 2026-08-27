@@ -33,6 +33,7 @@
 - [x] Apply the same static readable content, citations, author/date schema and social metadata treatment to Compress, Remove EXIF and Guides.
 - [x] Increase Compress crawler-visible static content depth and verify the non-JavaScript response is substantive for AI and search crawlers.
 - [x] Strengthen Remove EXIF crawler-visible static depth, answer-first guidance, entity markup, same-identity About reference and visible About/contact signals.
+- [x] Add semantic H3 subsections to the crawler-visible Remove EXIF page and verify they are present in the deployed HTML.
 
 ## Hybrid Deployment Monorepo
 
