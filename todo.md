@@ -106,3 +106,4 @@
 - [x] Remove the duplicate pnpm-version declaration that blocked the GitHub Actions frontend deployment before Cloudflare authentication ran.
 - [x] Replace the malformed `CLOUDFLARE_ACCOUNT_ID` GitHub secret with the exact single-line account ID, then rerun both deployment workflows successfully.
 - [x] Redirect `www.convertanyimage.com` to `convertanyimage.com` with a 301 rule that preserves the path and query string.
+- [x] Allow uploading and compressing another image after a previous compression completes, even if the first result is not downloaded.
