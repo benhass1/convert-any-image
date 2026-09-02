@@ -36,20 +36,6 @@ pnpm dev:worker
 
 Set the final Cloudflare Pages origin in `worker/wrangler.toml` before deploying. For production, publish through the GitHub workflow after completing [SECRETS_SETUP.md](./SECRETS_SETUP.md).
 
-### Edge image assessment
-
-The same Worker exposes `POST /api/detect-ai`. It accepts a raw image body or a multipart field named `image` (up to 8 MB), invokes the Workers AI `@cf/llava-hf/llava-1.5-7b-hf` vision-language model with a constrained JSON prompt, and returns an automated visual assessment, confidence, and brief observations. The `/view-exif` page starts this request in parallel with its browser-local EXIF read and displays loading, result, metadata-artifact, or unavailable states.
-
-The assessment is deliberately presented as **probabilistic rather than forensic**. A vision-language model can describe visual signals but cannot establish authorship, provenance, or authenticity from image pixels alone. The local metadata check looks only at `Software`, `Artist`, `Comment`, and `ImageDescription` for known generator strings; those strings are useful artifacts, but not proof of how an image was created.
-
-The AI binding is declared in `worker/wrangler.toml`. After authenticating Wrangler, deploy the Worker with:
-
-```bash
-pnpm --dir worker install
-pnpm --dir worker check
-pnpm --dir worker deploy
-```
-
 ## Local Docker Converter
 
 The local backend does not deploy to Vercel or Cloudflare. It is for a trusted computer or private network where ImageMagick, Ghostscript and RAW tooling are available inside the container.

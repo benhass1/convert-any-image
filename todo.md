@@ -110,3 +110,5 @@
 - [x] Add a truthful Cloudflare Workers AI image-analysis endpoint and integrate its metadata-aware result card into /view-exif.
 - [x] Document and validate the Worker deployment configuration, CORS policy, frontend endpoint configuration, and failure states.
 - [x] Read and apply the requested changes from `pasted_content_8.txt`, then validate the affected website areas.
+- [ ] Remove the Cloudflare Workers AI visual-assessment feature from View EXIF and restore an accurate local EXIF-only workflow.
+- [ ] Research and document technically credible alternatives for image-provenance verification without presenting unreliable AI-authorship guesses.

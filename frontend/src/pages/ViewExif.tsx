@@ -5,18 +5,13 @@ import SiteShell from "@/components/SiteShell";
 import Seo from "@/components/Seo";
 import { useDefaultWorkbench } from "@/hooks/useDefaultWorkbench";
 import { prettySize } from "@/lib/image-processing";
-import { serviceConfig } from "@/lib/service-config";
 
 type ReadState = "idle" | "reading" | "ready" | "empty" | "error";
 type ExifEntry = { label: string; value: string };
-type AnalysisState = "idle" | "loading" | "ready" | "error";
-type EdgeAnalysis = { model: string; assessment: { is_ai: boolean | null; confidence: number; verdict: "Likely AI-Generated" | "Likely Authentic / Human" | "Inconclusive"; reasons: string[] }; disclaimer: string };
-const generatorMarkers = ["DALL-E", "Midjourney", "Stable Diffusion", "Firefly", "ComfyUI", "Flux"];
-const metadataArtifactFields = new Set(["Software", "Artist", "Comment", "Image Description"]);
 
 const exifFaqs = [
   ["Is viewing EXIF data safe?", "For standard inspection, the selected file is read in your browser. The report does not modify the original image."],
-  ["Does this tool store my images?", "This page has no account or file-storage step. EXIF inspection happens in your browser; the optional visual assessment sends the selected image to Cloudflare Workers AI for analysis."],
+  ["Does this tool store my images?", "This page has no account or file-storage step. Standard inspection happens in the browser on the device you are using."],
   ["How can I check photo metadata without uploading?", "Choose an image, wait for the local report, then review the fields that the current browser can read from that file."],
   ["Can I remove metadata after reviewing it?", "Yes. Open the separate Remove EXIF tool to create a fresh supported JPG, PNG or WebP copy, then review the result before sharing it."],
 ] as const;
@@ -34,8 +29,8 @@ const reportSchema = {
       isAccessibleForFree: true,
       offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
       provider: { "@id": "https://convertanyimage.com/#organization" },
-      description: "A browser-based EXIF report that lists metadata fields available from a selected image file, with an optional Cloudflare edge visual assessment and a separate local removal workflow.",
-      featureList: ["Browser-local inspection for readable EXIF fields", "Optional Cloudflare edge visual assessment", "File details and readable-field report", "No account or file-storage step", "Link to a separate EXIF-removal workflow"],
+      description: "A browser-based EXIF report that lists metadata fields available from a selected image file and links to a separate local removal workflow.",
+      featureList: ["Browser-local inspection for readable EXIF fields", "File details and readable-field report", "No account or file-storage step", "Link to a separate EXIF-removal workflow"],
     },
     {
       "@type": "FAQPage",
@@ -47,7 +42,7 @@ const reportSchema = {
       "@id": "https://convertanyimage.com/view-exif#webpage",
       url: "https://convertanyimage.com/view-exif",
       name: "View EXIF Data from an Image – Local Browser Report",
-      description: "Inspect EXIF fields that your browser can read from an image file, optionally request a Cloudflare edge visual assessment, then open the local EXIF remover to prepare a new copy.",
+      description: "Inspect EXIF fields that your browser can read from an image file, then open the local EXIF remover to prepare a new copy.",
       isPartOf: { "@id": "https://convertanyimage.com/#website" },
       author: { "@id": "https://convertanyimage.com/#organization" },
       publisher: { "@id": "https://convertanyimage.com/#organization" },
@@ -73,39 +68,13 @@ export default function ViewExif() {
   const [entries, setEntries] = useState<ExifEntry[]>([]);
   const [state, setState] = useState<ReadState>("idle");
   const [message, setMessage] = useState("Choose an image to inspect the fields your browser can read.");
-  const [analysisState, setAnalysisState] = useState<AnalysisState>("idle");
-  const [analysis, setAnalysis] = useState<EdgeAnalysis>();
-  const [metadataFlags, setMetadataFlags] = useState<string[]>([]);
-  const analysisRequest = useRef(0);
-
-  const analyzeOnEdge = async (selected: File, requestId: number) => {
-    setAnalysisState("loading");
-    setAnalysis(undefined);
-    try {
-      const response = await fetch(`${serviceConfig.transcriptWorkerUrl}/api/detect-ai`, {
-        method: "POST",
-        headers: { "Content-Type": selected.type || "application/octet-stream" },
-        body: selected,
-      });
-      const payload = await response.json() as EdgeAnalysis & { success?: boolean; error?: string };
-      if (!response.ok || !payload.success) throw new Error(payload.error || "Edge analysis failed.");
-      if (requestId !== analysisRequest.current) return;
-      setAnalysis(payload);
-      setAnalysisState("ready");
-    } catch {
-      if (requestId === analysisRequest.current) setAnalysisState("error");
-    }
-  };
 
   const inspect = async (selected?: File) => {
     if (!selected) return;
-    const requestId = ++analysisRequest.current;
     setFile(selected);
     setEntries([]);
-    setMetadataFlags([]);
     setState("reading");
     setMessage("Reading available EXIF fields locally…");
-    void analyzeOnEdge(selected, requestId);
     try {
       const exifr = await import("exifr");
       const parsed = await exifr.parse(selected, true).catch(() => undefined) as Record<string, unknown> | undefined;
@@ -113,8 +82,6 @@ export default function ViewExif() {
         .filter(([, value]) => value !== undefined && value !== null && presentValue(value).trim().length > 0)
         .map(([key, value]) => ({ label: labelFor(key), value: presentValue(value) }))
         .sort((left, right) => left.label.localeCompare(right.label));
-      const detectedMarkers = generatorMarkers.filter((marker) => nextEntries.some((entry) => metadataArtifactFields.has(entry.label) && entry.value.toLowerCase().includes(marker.toLowerCase())));
-      setMetadataFlags(detectedMarkers);
       setEntries(nextEntries);
       if (nextEntries.length) {
         setState("ready");
@@ -129,14 +96,13 @@ export default function ViewExif() {
     }
   };
 
-  return <SiteShell><Seo exactTitle title="View EXIF Data from an Image – Local Browser Report" description="Inspect EXIF fields that your browser can read from an image file, optionally request a Cloudflare edge visual assessment, then open the local EXIF remover to prepare a new copy." keywords="view exif data, local browser-based metadata viewer, privacy-safe image inspection, check photo metadata without uploading" jsonLd={reportSchema}/><main>
+  return <SiteShell><Seo exactTitle title="View EXIF Data from an Image – Local Browser Report" description="Inspect EXIF fields that your browser can read from an image file, then open the local EXIF remover to prepare a new copy." keywords="view exif data, local browser-based metadata viewer, privacy-safe image inspection, check photo metadata without uploading" jsonLd={reportSchema}/><main>
     <section id="view-exif-upload" className="scroll-mt-24 border-b border-[#132432]/10 bg-[#f4f0e8] px-5 py-5 lg:px-10 lg:py-8">
       <div className="mx-auto grid max-w-[1360px] border border-[#132432]/12 bg-[#fffdf8] lg:grid-cols-[minmax(0,1fr)_320px]">
-        <div className="min-w-0 p-5 sm:p-8"><p className="label">01 / EXIF REPORT</p><h1 className="font-display mt-2 max-w-3xl text-3xl font-bold leading-[.96] tracking-[-.06em] sm:text-4xl">View image EXIF data on your device</h1><p className="mt-4 max-w-2xl text-sm leading-6 text-[#52616a]">Choose an image file to list the EXIF fields that are available to this browser. EXIF parsing stays local; the optional visual assessment sends the selected image to Cloudflare Workers AI and does not modify your original.</p>
+        <div className="min-w-0 p-5 sm:p-8"><p className="label">01 / EXIF REPORT</p><h1 className="font-display mt-2 max-w-3xl text-3xl font-bold leading-[.96] tracking-[-.06em] sm:text-4xl">View image EXIF data on your device</h1><p className="mt-4 max-w-2xl text-sm leading-6 text-[#52616a]">Choose an image file to list the EXIF fields that are available to this browser. The report stays local and does not modify your original.</p>
           <div className="mt-7 border border-dashed border-[#132432]/20 bg-[linear-gradient(90deg,rgba(19,36,50,.055)_1px,transparent_1px),linear-gradient(rgba(19,36,50,.055)_1px,transparent_1px)] bg-[size:20px_20px] p-7"><div className="flex flex-col items-start gap-5 sm:flex-row sm:items-center sm:justify-between"><div className="flex items-center gap-4"><span className="grid h-12 w-12 shrink-0 place-items-center rounded-full bg-[#132432] text-[#b7f840]"><ScanSearch className="h-5 w-5"/></span><div><p className="label text-[#5c7820]">READY / LOCAL READ</p><h2 className="font-display mt-2 text-xl font-bold tracking-[-.04em]">Choose an image to inspect</h2><p className="mt-1 text-sm text-[#52616a]">Common formats work best; readable metadata depends on the file and browser.</p></div></div><button type="button" onClick={() => input.current?.click()} className="inline-flex shrink-0 items-center gap-2 border border-[#132432] bg-[#fffdf8] px-4 py-3 text-sm font-bold transition-colors hover:bg-[#132432] hover:text-[#f4f0e8]"><FileSearch className="h-4 w-4"/>Select image</button><input ref={input} type="file" accept="image/*,.heic,.heif,.tif,.tiff" className="hidden" onChange={(event) => { void inspect(event.target.files?.[0]); event.target.value = ""; }}/></div></div>
           {state !== "idle" && <div className={`mt-5 border-l-2 p-4 text-sm leading-6 ${state === "error" ? "border-[#9c3d31] bg-[#f8e4dd] text-[#6f2d24]" : state === "ready" ? "border-[#b7f840] bg-[#e8f4cc] text-[#314753]" : "border-[#132432]/25 bg-[#f4f0e8] text-[#52616a]"}`} role="status">{state === "reading" ? <LoaderCircle className="mr-2 inline h-4 w-4 animate-spin"/> : <Info className="mr-2 inline h-4 w-4"/>}{message}</div>}
           {file && <section className="mt-6 border border-[#132432]/12"><div className="flex flex-wrap items-center gap-3 border-b border-[#132432]/10 bg-[#f4f0e8] px-4 py-3"><FileType2 className="h-4 w-4 text-[#5c7820]"/><p className="min-w-0 flex-1 truncate text-sm font-bold">{file.name}</p><span className="text-xs text-[#65727b]">{prettySize(file.size)} · {file.type || "Type not supplied"}</span></div>{state === "ready" && <dl className="divide-y divide-[#132432]/10">{entries.map((entry) => <div key={`${entry.label}-${entry.value}`} className="grid gap-1 px-4 py-3 sm:grid-cols-[minmax(150px,.32fr)_1fr] sm:gap-5"><dt className="text-xs font-bold tracking-[.06em] text-[#52616a]">{entry.label}</dt><dd className="break-words text-sm leading-6 text-[#314753]">{entry.value}</dd></div>)}</dl>}</section>}
-          {file && <section className="mt-6 border border-[#132432]/12 bg-[#f4f0e8] p-5" aria-live="polite"><div className="flex flex-wrap items-start justify-between gap-4"><div><p className="label text-[#5c7820]">EDGE IMAGE ANALYSIS</p><h2 className="font-display mt-2 text-2xl font-bold tracking-[-.05em]">AI Image Authenticity Check</h2></div>{analysisState === "ready" && <span className={`border px-3 py-2 text-xs font-bold ${analysis?.assessment.verdict === "Likely AI-Generated" ? "border-[#9c3d31] bg-[#f8e4dd] text-[#6f2d24]" : analysis?.assessment.verdict === "Likely Authentic / Human" ? "border-[#5c7820] bg-[#e8f4cc] text-[#314753]" : "border-[#c07a28] bg-[#fff4df] text-[#6e4b22]"}`}>{analysis?.assessment.verdict}</span>}</div>{analysisState === "loading" && <p className="mt-4 flex items-center gap-2 text-sm leading-6 text-[#52616a]"><LoaderCircle className="h-4 w-4 animate-spin text-[#5c7820]"/>Scanning image pixels via Cloudflare Edge AI…</p>}{analysisState === "error" && <p className="mt-4 text-sm leading-6 text-[#52616a]">The visual assessment is unavailable right now. The local EXIF report above remains available.</p>}{analysisState === "ready" && analysis && <><p className="mt-4 text-sm leading-6 text-[#52616a]">{analysis.assessment.verdict}. {analysis.disclaimer}</p><div className="mt-5 h-3 overflow-hidden bg-[#d8d2c5]"><div className={`h-full transition-[width] ${analysis.assessment.verdict === "Likely AI-Generated" ? "bg-[#9c3d31]" : analysis.assessment.verdict === "Likely Authentic / Human" ? "bg-[#5c7820]" : "bg-[#c07a28]"}`} style={{ width: `${analysis.assessment.confidence}%` }}/></div><div className="mt-2 flex items-center justify-between text-xs font-bold text-[#52616a]"><span>0%</span><span>{analysis.assessment.confidence}% assessment confidence</span><span>100%</span></div>{analysis.assessment.reasons.length > 0 && <ul className="mt-5 space-y-2 border-t border-[#132432]/10 pt-4 text-sm leading-6 text-[#52616a]">{analysis.assessment.reasons.map((reason) => <li key={reason} className="flex gap-2"><span className="mt-2 h-1.5 w-1.5 shrink-0 bg-[#5c7820]"/>{reason}</li>)}</ul>}</>}{metadataFlags.length > 0 && <p className="mt-5 border-l-2 border-[#c07a28] bg-[#fff4df] p-3 text-sm leading-6 text-[#6e4b22]">Metadata artifact detected: {metadataFlags.join(", ")}. This is a file-string signal only and does not prove how the image was created.</p>}<p className="mt-5 border-t border-[#132432]/10 pt-4 text-xs leading-5 text-[#65727b]">Powered by Cloudflare Workers AI using a vision-language model. This automated visual assessment can be wrong and does not establish authorship, provenance, or authenticity.</p></section>}
           <section className="mt-8 border-t border-[#132432]/12 pt-7"><p className="label text-[#5c7820]">HOW IT WORKS</p><h2 className="font-display mt-3 text-2xl font-bold tracking-[-.05em]">How to check photo metadata without uploading</h2><ol className="mt-5 grid gap-3 sm:grid-cols-3"><li className="border border-[#132432]/12 bg-[#f4f0e8] p-4"><span className="label text-[#5c7820]">01 / SELECT</span><h3 className="font-display mt-3 text-lg font-bold tracking-[-.04em]">Choose one image</h3><p className="mt-2 text-sm leading-6 text-[#52616a]">Select the file you want to inspect. The original remains unchanged.</p></li><li className="border border-[#132432]/12 bg-[#f4f0e8] p-4"><span className="label text-[#5c7820]">02 / REVIEW</span><h3 className="font-display mt-3 text-lg font-bold tracking-[-.04em]">Read available fields</h3><p className="mt-2 text-sm leading-6 text-[#52616a]">Check the readable camera, date, orientation or location fields.</p></li><li className="border border-[#132432]/12 bg-[#f4f0e8] p-4"><span className="label text-[#5c7820]">03 / DECIDE</span><h3 className="font-display mt-3 text-lg font-bold tracking-[-.04em]">Keep or make a copy</h3><p className="mt-2 text-sm leading-6 text-[#52616a]">Use the removal tool only when a new sharing copy is appropriate.</p></li></ol></section>
           <section className="mt-8 border-l-2 border-[#b7f840] bg-[#132432] p-5 text-[#f4f0e8]"><p className="label text-[#b7f840]">NEXT STEP</p><h2 className="font-display mt-3 text-2xl font-bold tracking-[-.05em]">Want to remove EXIF data?</h2><p className="mt-3 max-w-2xl text-sm leading-6 text-[#d8d2c5]/72">Create a fresh JPG, PNG or WebP copy with the existing local remover. It leaves your source file unchanged.</p><a href="/remove-exif#exif-upload" className="mt-5 inline-flex items-center gap-2 bg-[#b7f840] px-4 py-3 text-sm font-bold text-[#132432] transition-transform hover:-translate-y-0.5"><ShieldCheck className="h-4 w-4"/>Open Remove EXIF</a></section>
         </div>
