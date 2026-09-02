@@ -18,6 +18,8 @@ La vérification locale a été exercée dans Chromium contre la page View EXIF 
 
 Ces essais confirment les trois états essentiels du parcours réel : provenance validée lorsque le lecteur retourne un succès explicite, absence non concluante de credential et format non lisible.
 
+Le même contrôle a été exécuté après le déploiement sur `https://convertanyimage.com/view-exif`. Les trois mêmes fixtures ont produit respectivement `CREDENTIAL VALIDATED`, `No Content Credential was found` et `Content Credentials could not be read`, ce qui confirme le fonctionnement publié.
+
 ## Sources
 
 [1] [c2pa-web — guide d’installation et lecture des manifestes](https://github.com/contentauth/c2pa-js/blob/main/packages/c2pa-web/README.md)

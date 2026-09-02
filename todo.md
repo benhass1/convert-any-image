@@ -116,4 +116,4 @@
 - [x] Add local C2PA / Content Credentials verification to View EXIF, with explicit valid, absent, and unreadable states.
 - [x] Restore access to the managed development preview after the Vite restart so C2PA UI validation can complete.
 - [x] Validate View EXIF C2PA results with a credential-present file, a no-credential file, and an unreadable or unsupported file, then record the outcomes.
-- [ ] Deploy the validated C2PA feature and verify the live View EXIF route.
+- [x] Deploy the validated C2PA feature and verify the live View EXIF route.

@@ -3,6 +3,7 @@ import { setTimeout as delay } from "node:timers/promises";
 const chrome = await fetch("http://127.0.0.1:9222/json/list").then((response) => response.json());
 const target = chrome.find((entry) => entry.type === "page" && entry.webSocketDebuggerUrl);
 if (!target) throw new Error("No Chromium page with a debugging endpoint was found.");
+const testUrl = process.env.C2PA_TEST_URL || "http://localhost:5173/view-exif";
 
 const socket = new WebSocket(target.webSocketDebuggerUrl);
 await new Promise((resolve, reject) => {
@@ -32,6 +33,11 @@ async function pageText() {
   return result.result.value;
 }
 
+async function pageUrl() {
+  const result = await send("Runtime.evaluate", { expression: "location.href", returnByValue: true });
+  return result.result.value;
+}
+
 async function waitFor(labels, timeoutMs = 30_000) {
   const deadline = Date.now() + timeoutMs;
   while (Date.now() < deadline) {
@@ -43,6 +49,17 @@ async function waitFor(labels, timeoutMs = 30_000) {
   throw new Error(`Timed out while waiting for one of: ${labels.join(", ")}`);
 }
 
+async function waitForUrl(timeoutMs = 15_000) {
+  const expected = new URL(testUrl);
+  const deadline = Date.now() + timeoutMs;
+  while (Date.now() < deadline) {
+    const current = new URL(await pageUrl());
+    if (current.origin === expected.origin && current.pathname === expected.pathname) return;
+    await delay(100);
+  }
+  throw new Error(`Timed out while navigating to ${testUrl}`);
+}
+
 async function selectFile(filePath) {
   const document = await send("DOM.getDocument");
   const node = await send("DOM.querySelector", { nodeId: document.root.nodeId, selector: "input[type=file]" });
@@ -51,7 +68,8 @@ async function selectFile(filePath) {
 }
 
 await send("Page.enable");
-await send("Page.navigate", { url: "http://localhost:5173/view-exif" });
+await send("Page.navigate", { url: testUrl });
+await waitForUrl();
 await waitFor(["Choose an image to inspect"]);
 
 const fixtures = [
