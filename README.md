@@ -58,6 +58,14 @@ Provider-specific checks are useful only as a secondary, clearly scoped option. 
 
 [3] [OpenAI — Provenance signals, supported coverage and limitations](https://help.openai.com/en/articles/8912793-provenance-signals-content-credentials-synthid-in-openai-generated-content)
 
+### View EXIF: vérification C2PA locale
+
+La page `/view-exif` charge `@contentauth/c2pa-web` uniquement après la sélection d’un fichier compatible. La bibliothèque lit le manifeste C2PA et ses informations de validation dans le navigateur ; le fichier sélectionné n’est pas envoyé à Convert Any Image ni au Worker Cloudflare.
+
+L’interface rend l’un des quatre résultats suivants : **credential validated** lorsqu’un succès de validation est explicitement fourni, **credential found** lorsqu’un manifeste est lisible mais sans statut de succès explicite, **validation issue** lorsqu’un échec est signalé, ou **no credential found / unreadable** lorsque le fichier ne contient pas de manifeste exploitable. L’absence de Content Credentials est toujours présentée comme **non concluante**.
+
+Le package apporte un binaire WebAssembly chargé à la demande. Cela ajoute un téléchargement initial lorsque l’utilisateur lance pour la première fois le contrôle C2PA, mais évite ce coût sur les parcours de conversion et de compression. La validation C2PA ne remplace pas une analyse judiciaire, ne certifie pas le contexte d’une image et ne permet pas d’inférer l’origine d’un fichier sans manifeste.
+
 ## Local Docker Converter
 
 The local backend does not deploy to Vercel or Cloudflare. It is for a trusted computer or private network where ImageMagick, Ghostscript and RAW tooling are available inside the container.

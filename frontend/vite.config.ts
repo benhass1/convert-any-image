@@ -14,5 +14,5 @@ export default defineConfig({
   envDir: import.meta.dirname,
   root: import.meta.dirname,
   build: { outDir: path.resolve(import.meta.dirname, "dist"), emptyOutDir: true },
-  server: { port: 5173, host: true },
+  server: { port: 5173, host: true, allowedHosts: [".manus.computer"] },
 });
