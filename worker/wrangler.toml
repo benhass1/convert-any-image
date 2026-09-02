@@ -7,3 +7,6 @@ workers_dev = true
 # Cloudflare Pages hostname plus the intended custom domain during DNS cutover.
 ALLOWED_ORIGINS = "https://convert-any-image.pages.dev,https://convertanyimage.com,https://www.convertanyimage.com"
 CACHE_TTL_SECONDS = "86400"
+
+[ai]
+binding = "AI"

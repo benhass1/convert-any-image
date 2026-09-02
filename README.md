@@ -36,6 +36,20 @@ pnpm dev:worker
 
 Set the final Cloudflare Pages origin in `worker/wrangler.toml` before deploying. For production, publish through the GitHub workflow after completing [SECRETS_SETUP.md](./SECRETS_SETUP.md).
 
+### Edge image analysis
+
+The same Worker also exposes `POST /api/detect-ai`. It accepts a raw image body or a multipart field named `image` (up to 8 MB), invokes the Workers AI `@cf/microsoft/resnet-50` ImageNet classifier, and returns its top classification tags and confidence. The `/view-exif` page calls this endpoint in parallel with its browser-local EXIF read and displays a loading, result or unavailable state.
+
+This is intentionally described as an **image-classification signal**, not a detector of AI authorship or provenance. ResNet-50 is trained for ImageNet classification, so its label confidence must not be interpreted as an AI-generated probability. The local metadata check can flag generator-name strings, but those strings are only file artifacts and are not proof of how an image was created.
+
+The AI binding is declared in `worker/wrangler.toml`. After authenticating Wrangler, deploy the Worker with:
+
+```bash
+pnpm --dir worker install
+pnpm --dir worker check
+pnpm --dir worker deploy
+```
+
 ## Local Docker Converter
 
 The local backend does not deploy to Vercel or Cloudflare. It is for a trusted computer or private network where ImageMagick, Ghostscript and RAW tooling are available inside the container.
