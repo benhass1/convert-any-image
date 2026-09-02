@@ -36,6 +36,28 @@ pnpm dev:worker
 
 Set the final Cloudflare Pages origin in `worker/wrangler.toml` before deploying. For production, publish through the GitHub workflow after completing [SECRETS_SETUP.md](./SECRETS_SETUP.md).
 
+### Image-provenance verification alternatives
+
+Convert Any Image intentionally does **not** label an image as AI-generated from appearance alone. A reliable next step is to verify evidence that is actually present in the file, rather than to infer origin from pixels.
+
+| Approach | What it can establish | Main limitation | Setup complexity |
+| --- | --- | --- | --- |
+| **C2PA / Content Credentials verification** | Whether a present Content Credential has a valid, tamper-evident manifest and which signed creation or edit assertions it carries. | The absence of a credential does not mean the image is human-made or AI-made; credentials can be missing or stripped. | Moderate: add the browser-oriented `c2pa-web` library and present a manifest/validation result. |
+| **Provider-specific provenance verification** | Whether a supported provider’s own provenance signal is found in a compatible file. | It only covers that provider and its supported files or export paths; a missing signal is inconclusive. | Low for a link-out workflow; provider APIs may require separate access and terms. |
+| **Specialist forensic detection service** | A provider-specific probabilistic score from a model trained for synthetic-media detection. | Scores can shift with new models, editing, compression and domain; use only after testing a representative evaluation set and with clear error reporting. | Higher: vendor review, privacy agreement, API integration, monitoring and regression testing. |
+
+For this site, the recommended first enhancement is **C2PA / Content Credentials verification**. C2PA uses signed manifests and asset bindings that are tamper-evident, and the official JavaScript ecosystem includes `c2pa-web` for browser-side metadata work. It can report “valid credential,” “invalid credential,” or “no credential found” without claiming that an uncredentialed image has a particular origin. [1] [2]
+
+Provider-specific checks are useful only as a secondary, clearly scoped option. For example, OpenAI Verify is designed to identify supported OpenAI provenance signals; it does not determine whether content came from other AI tools and a missing signal remains inconclusive. [3]
+
+#### References
+
+[1] [C2PA FAQs — Content Credentials and tamper-evident provenance](https://c2pa.org/faqs/)
+
+[2] [Content Authenticity Initiative open-source SDK — browser validation and manifest handling](https://opensource.contentauthenticity.org/docs/getting-started/)
+
+[3] [OpenAI — Provenance signals, supported coverage and limitations](https://help.openai.com/en/articles/8912793-provenance-signals-content-credentials-synthid-in-openai-generated-content)
+
 ## Local Docker Converter
 
 The local backend does not deploy to Vercel or Cloudflare. It is for a trusted computer or private network where ImageMagick, Ghostscript and RAW tooling are available inside the container.
