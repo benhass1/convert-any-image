@@ -6,20 +6,24 @@ export interface Env {
 
 type TranscriptCue = { text: string; startMs: number; durationMs: number };
 type TranscriptPayload = { videoId: string; language: string; cached: boolean; cues: TranscriptCue[] };
-type ClassificationTag = { label: string; score: number };
+type AuthenticityAssessment = {
+  is_ai: boolean | null;
+  confidence: number;
+  verdict: "Likely AI-Generated" | "Likely Authentic / Human" | "Inconclusive";
+  reasons: string[];
+};
 type EdgeAnalysisPayload = {
   success: true;
   model: string;
-  analysis_type: "image_classification";
-  verdict: "Classification signal only — not an AI-authenticity verdict";
-  ai_probability: null;
-  confidence_percent: number;
-  confidence_label: "Low" | "Medium" | "High";
-  raw_tags: ClassificationTag[];
+  analysis_type: "visual_authenticity_assessment";
+  assessment: AuthenticityAssessment;
+  disclaimer: string;
 };
+
 const jsonHeaders = { "Content-Type": "application/json; charset=UTF-8" };
 const MAX_ANALYSIS_BYTES = 8 * 1024 * 1024;
-const IMAGE_ANALYSIS_MODEL = "@cf/microsoft/resnet-50";
+const IMAGE_ANALYSIS_MODEL = "@cf/llava-hf/llava-1.5-7b-hf";
+const ASSESSMENT_PROMPT = `Review this image for visual signals that can sometimes be associated with synthetic image generation, such as implausible geometry, warped edges, inconsistent anatomy, repeated textures, or unnatural lighting. This is a probabilistic visual assessment only: you cannot establish authorship or provenance from pixels alone. Return only a JSON object with this exact shape: {"is_ai": true|false|null, "confidence": number from 0 to 100, "verdict": "Likely AI-Generated"|"Likely Authentic / Human"|"Inconclusive", "reasons": ["brief observation", "brief observation"]}. Use "Inconclusive" and null when evidence is insufficient.`;
 
 function corsHeaders(request: Request, env: Env) {
   const origin = request.headers.get("Origin");
@@ -28,29 +32,61 @@ function corsHeaders(request: Request, env: Env) {
   const allowedOrigin = origin && allowedOrigins.includes(origin) ? origin : allowedOrigins[0];
   return { "Access-Control-Allow-Origin": allowedOrigin, "Access-Control-Allow-Methods": "POST, OPTIONS", "Access-Control-Allow-Headers": "Content-Type", "Vary": "Origin" };
 }
-function response(body: unknown, status: number, cors: HeadersInit) { return new Response(JSON.stringify(body), { status, headers: { ...jsonHeaders, ...cors } }); }
-function cacheKey(request: Request, videoId: string, language: string) { const url = new URL(request.url); url.pathname = `/__cache/transcript/${videoId}/${language}`; url.search = ""; return new Request(url.toString()); }
-function parseYouTubeEvents(payload: { events?: Array<{ segs?: Array<{ utf8?: string }>; tStartMs?: number; dDurationMs?: number }> }): TranscriptCue[] { return (payload.events || []).flatMap((event) => { const text = (event.segs || []).map((segment) => segment.utf8 || "").join("").trim(); return text ? [{ text, startMs: event.tStartMs || 0, durationMs: event.dDurationMs || 0 }] : []; }); }
-async function fetchTranscript(videoId: string, language: string): Promise<TranscriptCue[]> { const upstream = new URL("https://www.youtube.com/api/timedtext"); upstream.searchParams.set("v", videoId); upstream.searchParams.set("lang", language); upstream.searchParams.set("fmt", "json3"); const upstreamResponse = await fetch(upstream, { headers: { Accept: "application/json" } }); if (upstreamResponse.status === 429) throw new Error("UPSTREAM_RATE_LIMIT"); if (!upstreamResponse.ok) throw new Error("TRANSCRIPT_NOT_AVAILABLE"); return parseYouTubeEvents(await upstreamResponse.json()); }
 
-function confidenceLabel(percent: number): EdgeAnalysisPayload["confidence_label"] {
-  return percent >= 80 ? "High" : percent >= 50 ? "Medium" : "Low";
+function response(body: unknown, status: number, cors: HeadersInit) {
+  return new Response(JSON.stringify(body), { status, headers: { ...jsonHeaders, ...cors } });
 }
 
-function normalizeClassification(result: unknown): ClassificationTag[] {
-  const values = Array.isArray(result) ? result : result && typeof result === "object" && "result" in result ? (result as { result?: unknown }).result : [];
-  if (!Array.isArray(values)) return [];
-  return values
-    .flatMap((value) => {
-      if (!value || typeof value !== "object") return [];
-      const record = value as { label?: unknown; score?: unknown };
-      const label = typeof record.label === "string" ? record.label.trim() : "";
-      const score = typeof record.score === "number" && Number.isFinite(record.score) ? Math.max(0, Math.min(1, record.score)) : 0;
-      return label ? [{ label, score }] : [];
-    })
-    .sort((left, right) => right.score - left.score)
-    .slice(0, 5)
-    .map((tag) => ({ label: tag.label, score: Number(tag.score.toFixed(4)) }));
+function cacheKey(request: Request, videoId: string, language: string) {
+  const url = new URL(request.url);
+  url.pathname = `/__cache/transcript/${videoId}/${language}`;
+  url.search = "";
+  return new Request(url.toString());
+}
+
+function parseYouTubeEvents(payload: { events?: Array<{ segs?: Array<{ utf8?: string }>; tStartMs?: number; dDurationMs?: number }> }): TranscriptCue[] {
+  return (payload.events || []).flatMap((event) => {
+    const text = (event.segs || []).map((segment) => segment.utf8 || "").join("").trim();
+    return text ? [{ text, startMs: event.tStartMs || 0, durationMs: event.dDurationMs || 0 }] : [];
+  });
+}
+
+async function fetchTranscript(videoId: string, language: string): Promise<TranscriptCue[]> {
+  const upstream = new URL("https://www.youtube.com/api/timedtext");
+  upstream.searchParams.set("v", videoId);
+  upstream.searchParams.set("lang", language);
+  upstream.searchParams.set("fmt", "json3");
+  const upstreamResponse = await fetch(upstream, { headers: { Accept: "application/json" } });
+  if (upstreamResponse.status === 429) throw new Error("UPSTREAM_RATE_LIMIT");
+  if (!upstreamResponse.ok) throw new Error("TRANSCRIPT_NOT_AVAILABLE");
+  return parseYouTubeEvents(await upstreamResponse.json());
+}
+
+function fallbackAssessment(reason: string): AuthenticityAssessment {
+  return { is_ai: null, confidence: 0, verdict: "Inconclusive", reasons: [reason] };
+}
+
+function clampConfidence(value: unknown) {
+  const parsed = typeof value === "number" ? value : typeof value === "string" ? Number(value) : Number.NaN;
+  return Number.isFinite(parsed) ? Math.round(Math.max(0, Math.min(100, parsed)) * 10) / 10 : 0;
+}
+
+function parseAssessment(modelResult: unknown): AuthenticityAssessment {
+  const value = modelResult && typeof modelResult === "object" ? modelResult as { response?: unknown; description?: unknown } : {};
+  const raw = typeof value.response === "string" ? value.response : typeof value.description === "string" ? value.description : "";
+  const withoutFences = raw.replace(/```(?:json)?/gi, "").trim();
+  const start = withoutFences.indexOf("{");
+  const end = withoutFences.lastIndexOf("}");
+  if (start < 0 || end <= start) return fallbackAssessment("The visual model did not return a structured assessment.");
+  try {
+    const parsed = JSON.parse(withoutFences.slice(start, end + 1)) as Partial<AuthenticityAssessment>;
+    const verdict = parsed.verdict === "Likely AI-Generated" || parsed.verdict === "Likely Authentic / Human" || parsed.verdict === "Inconclusive" ? parsed.verdict : "Inconclusive";
+    const is_ai = typeof parsed.is_ai === "boolean" ? parsed.is_ai : null;
+    const reasons = Array.isArray(parsed.reasons) ? parsed.reasons.filter((reason): reason is string => typeof reason === "string").map((reason) => reason.trim()).filter(Boolean).slice(0, 4) : [];
+    return { is_ai: verdict === "Inconclusive" ? null : is_ai, confidence: clampConfidence(parsed.confidence), verdict, reasons: reasons.length ? reasons : ["The model returned no specific visual observations."] };
+  } catch {
+    return fallbackAssessment("The visual model returned an unreadable assessment.");
+  }
 }
 
 async function readImageBytes(request: Request): Promise<Uint8Array> {
@@ -74,24 +110,19 @@ async function detectImage(request: Request, env: Env, cors: HeadersInit): Promi
     if (!env.AI) return response({ success: false, error: "Workers AI is not configured for this Worker." }, 503, cors);
     const bytes = await readImageBytes(request);
     if (!bytes.length) return response({ success: false, error: "An image body is required." }, 400, cors);
-    const modelResult = await env.AI.run(IMAGE_ANALYSIS_MODEL, { image: [...bytes] });
-    const rawTags = normalizeClassification(modelResult);
-    const confidencePercent = Math.round((rawTags[0]?.score || 0) * 1000) / 10;
+    const modelResult = await env.AI.run(IMAGE_ANALYSIS_MODEL, { image: [...bytes], prompt: ASSESSMENT_PROMPT, max_tokens: 220, temperature: 0.1 });
     const payload: EdgeAnalysisPayload = {
       success: true,
       model: IMAGE_ANALYSIS_MODEL,
-      analysis_type: "image_classification",
-      verdict: "Classification signal only — not an AI-authenticity verdict",
-      ai_probability: null,
-      confidence_percent: confidencePercent,
-      confidence_label: confidenceLabel(confidencePercent),
-      raw_tags: rawTags,
+      analysis_type: "visual_authenticity_assessment",
+      assessment: parseAssessment(modelResult),
+      disclaimer: "This automated visual assessment can be wrong and cannot establish image authorship, provenance, or authenticity.",
     };
     return response(payload, 200, cors);
   } catch (error) {
     const message = error instanceof Error ? error.message : "IMAGE_ANALYSIS_FAILED";
     const status = message === "IMAGE_TOO_LARGE" ? 413 : message === "IMAGE_REQUIRED" ? 400 : 502;
-    const publicMessage = message === "IMAGE_TOO_LARGE" ? "Images must be 8 MB or smaller for edge analysis." : message === "IMAGE_REQUIRED" ? "An image body is required." : "Edge image analysis is temporarily unavailable.";
+    const publicMessage = message === "IMAGE_TOO_LARGE" ? "Images must be 8 MB or smaller for edge analysis." : message === "IMAGE_REQUIRED" ? "An image body is required." : "Visual assessment is temporarily unavailable.";
     return response({ success: false, error: publicMessage }, status, cors);
   }
 }

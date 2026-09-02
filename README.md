@@ -36,11 +36,11 @@ pnpm dev:worker
 
 Set the final Cloudflare Pages origin in `worker/wrangler.toml` before deploying. For production, publish through the GitHub workflow after completing [SECRETS_SETUP.md](./SECRETS_SETUP.md).
 
-### Edge image analysis
+### Edge image assessment
 
-The same Worker also exposes `POST /api/detect-ai`. It accepts a raw image body or a multipart field named `image` (up to 8 MB), invokes the Workers AI `@cf/microsoft/resnet-50` ImageNet classifier, and returns its top classification tags and confidence. The `/view-exif` page calls this endpoint in parallel with its browser-local EXIF read and displays a loading, result or unavailable state.
+The same Worker exposes `POST /api/detect-ai`. It accepts a raw image body or a multipart field named `image` (up to 8 MB), invokes the Workers AI `@cf/llava-hf/llava-1.5-7b-hf` vision-language model with a constrained JSON prompt, and returns an automated visual assessment, confidence, and brief observations. The `/view-exif` page starts this request in parallel with its browser-local EXIF read and displays loading, result, metadata-artifact, or unavailable states.
 
-This is intentionally described as an **image-classification signal**, not a detector of AI authorship or provenance. ResNet-50 is trained for ImageNet classification, so its label confidence must not be interpreted as an AI-generated probability. The local metadata check can flag generator-name strings, but those strings are only file artifacts and are not proof of how an image was created.
+The assessment is deliberately presented as **probabilistic rather than forensic**. A vision-language model can describe visual signals but cannot establish authorship, provenance, or authenticity from image pixels alone. The local metadata check looks only at `Software`, `Artist`, `Comment`, and `ImageDescription` for known generator strings; those strings are useful artifacts, but not proof of how an image was created.
 
 The AI binding is declared in `worker/wrangler.toml`. After authenticating Wrangler, deploy the Worker with:
 

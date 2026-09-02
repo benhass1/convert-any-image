@@ -10,6 +10,14 @@
 
 1. https://developers.cloudflare.com/workers-ai/models/resnet-50/ — Cloudflare resnet-50 model documentation.
 2. https://developers.cloudflare.com/workers-ai/get-started/workers-wrangler/ — Cloudflare Workers AI binding setup documentation (URL identified from current docs navigation; retrieve before deployment if needed).
+3. https://developers.cloudflare.com/workers-ai/models/llama-3.2-11b-vision-instruct/ — Cloudflare’s Llama 3.2 Vision documentation, which requires an initial acceptance of the Meta license.
+4. https://developers.cloudflare.com/workers-ai/models/llava-1.5-7b-hf/ — Cloudflare’s LLaVA vision-language model documentation.
+
+## Vision-language assessment update
+
+- The requested follow-up feature uses `@cf/llava-hf/llava-1.5-7b-hf`, which Cloudflare documents as a vision-capable image-to-text model with a prompt and binary image input option.
+- The Worker constrains the model to a JSON assessment response and rejects malformed values into an explicit `Inconclusive` response rather than inventing a result.
+- The page labels the output as an automated visual assessment that can be wrong; it never treats it as proof of authorship, provenance, or authenticity.
 
 ## Production validation
 
