@@ -74,7 +74,7 @@ function clampConfidence(value: unknown) {
 function parseAssessment(modelResult: unknown): AuthenticityAssessment {
   const value = modelResult && typeof modelResult === "object" ? modelResult as { response?: unknown; description?: unknown } : {};
   const raw = typeof value.response === "string" ? value.response : typeof value.description === "string" ? value.description : "";
-  const withoutFences = raw.replace(/```(?:json)?/gi, "").trim();
+  const withoutFences = raw.replace(/```(?:json)?/gi, "").replace(/\\_/g, "_").trim();
   const start = withoutFences.indexOf("{");
   const end = withoutFences.lastIndexOf("}");
   if (start >= 0 && end > start) {
