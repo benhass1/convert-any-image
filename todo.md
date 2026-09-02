@@ -109,4 +109,4 @@
 - [x] Allow uploading and compressing another image after a previous compression completes, even if the first result is not downloaded.
 - [x] Add a truthful Cloudflare Workers AI image-analysis endpoint and integrate its metadata-aware result card into /view-exif.
 - [x] Document and validate the Worker deployment configuration, CORS policy, frontend endpoint configuration, and failure states.
-- [ ] Read and apply the requested changes from `pasted_content_8.txt`, then validate the affected website areas.
+- [x] Read and apply the requested changes from `pasted_content_8.txt`, then validate the affected website areas.
