@@ -117,3 +117,4 @@
 - [x] Restore access to the managed development preview after the Vite restart so C2PA UI validation can complete.
 - [x] Validate View EXIF C2PA results with a credential-present file, a no-credential file, and an unreadable or unsupported file, then record the outcomes.
 - [x] Deploy the validated C2PA feature and verify the live View EXIF route.
+- [ ] Add the provided Microsoft Clarity script to the site head only, then validate the build and production deployment.

@@ -1,13 +1,21 @@
 {
   "build_command": "pnpm run build",
-  "capabilities": [],
+  "capabilities": [
+    "db",
+    "server",
+    "user"
+  ],
   "dev_command": "pnpm run dev",
-  "env_vars": {},
-  "experiments": null,
+  "env_vars": {
+    "DATABASE_URL": "mysql://4VYMUvRFTahiRYp.root:vfijWw7Pi3p9oy1E7t7g@gateway06.us-east-1.prod.aws.tidbcloud.com:4000/NTQ7uhJoMf4K7JRN9KpcBc?ssl={\"rejectUnauthorized\":true}"
+  },
+  "experiments": [
+    "no_db_push"
+  ],
   "git_remote": {
     "repo_url": "https://7f0548f6b28a1758d9bf7be630d36cb4.artifacts.cloudflare.net/git/prod/NTQ7uhJoMf4K7JRN9KpcBc.git",
-    "expiration": "2026-08-27T07:19:44.114Z",
-    "token": "art_v2_x_83d89927fedabdfafc19872aab65bf333cf96559?expires=1787815184",
+    "expiration": "2026-09-04T22:51:03.336Z",
+    "token": "art_v2_x_3df1e095815c559faf01bf7ab93566e582e038d0?expires=1788562263",
     "backend": "GIT_BACKEND_ARTIFACTS"
   },
   "name": "convert-any-image",

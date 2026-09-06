@@ -46,3 +46,4 @@ docker-data/
 # Manus development artifacts
 .manus/
 .manus-logs/
+.project-config.json
