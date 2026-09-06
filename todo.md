@@ -118,3 +118,4 @@
 - [x] Validate View EXIF C2PA results with a credential-present file, a no-credential file, and an unreadable or unsupported file, then record the outcomes.
 - [x] Deploy the validated C2PA feature and verify the live View EXIF route.
 - [ ] Add the provided Microsoft Clarity script to the site head only, then validate the build and production deployment.
+- [ ] Commit and push the Microsoft Clarity head-only change to github/main, monitor Cloudflare Pages, and verify the live site head contains `ydxaz9rcb1`.
